@@ -45,8 +45,8 @@ class erc1155slot():
     def balance_of_batch(self, accounts, **kwargs):
         return self._contract.functions.balanceOfBatch(accounts, kwargs.get("ids")).call()
 
-    def approve(self, spender, value):
-        return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), value).call()
+    def approve(self, spender, approved):
+        return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), approved).call()
 
     def allowance(self, owner, spender):
         return self._contract.functions.isApprovalForAll(Web3.toChecksumAddress(owner), Web3.toChecksumAddress(spender)).call()
@@ -57,11 +57,11 @@ class erc1155slot():
     def unpause(self):
         return self._contract.functions.unpause().call()
 
-    def raw_transfer_from(self, from, to, id, amount, data = None):
-        return self._contract.functions.safeTransferFrom(from, to, id, amount, data)
+    def raw_transfer_from(self, fom, to, id, amount, data = None):
+        return self._contract.functions.safeTransferFrom(fom, to, id, amount, data)
 
-    def raw_transfer_from_batch(self, from, to, ids, amounts, data = None):
-        return self._contract.functions.safeBatchTransferFrom(from, to, ids, amounts, data)
+    def raw_transfer_from_batch(self, fom, to, ids, amounts, data = None):
+        return self._contract.functions.safeBatchTransferFrom(fom, to, ids, amounts, data)
 
     def raw_approve(self, spender, value):
         return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), value)

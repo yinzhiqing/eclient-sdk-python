@@ -42,7 +42,7 @@ class erc20slot():
     def transfer_from(self, fom, to, value):
         return self._contract.functions.transferFrom(fom, to, value).call()
 
-    def raw_transfer(self, to, value, from = None):
+    def raw_transfer(self, to, value, fom = None):
         return self._contract.functions.transfer(to, value)
 
     def raw_transfer_from(self, fom, to, value):

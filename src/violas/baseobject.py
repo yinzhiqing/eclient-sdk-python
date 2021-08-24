@@ -8,7 +8,6 @@ import log.logger
 import traceback
 import datetime
 import sqlalchemy
-import stmanage
 import requests
 import comm
 import comm.error

@@ -8,28 +8,25 @@ import log
 import log.logger
 import traceback
 import datetime
-import stmanage
 import requests
 import random
 import comm
 import comm.error
 import comm.result
 import comm.values
-import vmp_main_abi
-import vmp_datas_abi
-import vmp_state_abi
-import usdt_abi
-import wbtc_abi
-import erc20_std_abi
-import erc1155_std_abi
 from comm import version
 from comm.result import result, parse_except
 from comm.error import error
 from enum import Enum
 from comm.functions import json_print
-from ethopt.erc20slot import erc20slot 
-from ethopt.erc1155slot import erc1155slot 
-from ethopt.lbethwallet import lbethwallet
+from erc20slot import erc20slot 
+from erc1155slot import erc1155slot 
+from lbethwallet import lbethwallet
+from metafiles import (
+        erc1155_abi as erc1155_std_abi,
+        #erc721_abi as erc721_std_abi,
+        #erc20_abi as erc20_std_abi,
+        )
 
 import web3
 from web3 import Web3
@@ -42,8 +39,9 @@ ERC1155_NAME    = "erc1155"
 ERC721_NAME     = "erc721"
 
 contract_codes = {
-        ERC20_NAME      : {"abi":erc20_std_abi.ABI, "bytecode":erc20_std_abi.BYTECODE, "token_type": "erc20"},
-        ERC1155_NAME    : {"abi":erc1155_std_abi.ABI, "bytecode":erc1155_std_abi.BYTECODE, "token_type": "erc1155"},
+        #ERC20_NAME      : {"abi":erc20_std_abi.ABI, "bytecode":erc20_std_abi.BYTECODE, "token_type": "erc20", "address": erc20_std_abi.ADDRESS},
+        #ERC721_NAME      : {"abi":erc721_std_abi.ABI, "bytecode":erc721_std_abi.BYTECODE, "token_type": "erc721", "address": erc721_std_abi.ADDRESS},
+        ERC1155_NAME    : {"abi":erc1155_std_abi.ABI, "bytecode":erc1155_std_abi.BYTECODE, "token_type": "erc1155", "address": erc1155_std_abi.ADDRESS},
         }
 
 class walletproxy(lbethwallet):
@@ -96,33 +94,38 @@ class ethproxy():
 
         self._w3 = Web3(Web3.HTTPProvider(url))
 
-    def __get_contract_info(self, name, tokentype = ERC20_NAME):
-        contract = contract_codes.get(name)
-        assert contract is not None, f"contract name({name}) is invalid."
+    def __get_contract_info(self, token_id, tokentype = ERC1155_NAME):
+        contract = contract_codes.get(token_id, contract_codes[tokentype])
+        assert contract is not None, f"contract name({token_id}) is invalid."
         return contract
 
     def local_contract_info(self):
         json_print(contract_codes)
 
-    def load_contract(self, name, address, tokentype = ERC20_NAME):
-        contract = self.__get_contract_info(name)
-        assert contract is not None, f"not support token({name})"
+    def load_contract(self, token_id, address = None, tokentype = ERC20_NAME):
+        contract = self.__get_contract_info(token_id, tokentype)
+        assert contract is not None, f"not support token({token_id})"
+
+        address = contract["address"] if not address else address
+
         erc_token = None
-        if name == ERC20_NAME:
+        if tokentype == ERC20_NAME:
             erc_token = erc20slot(self._w3.eth.contract(Web3.toChecksumAddress(address), abi=contract["abi"]))
-            self.tokens_decimals[name] = pow(10, self.__get_token_decimals_with_name(erc_token, name))
-        else:
+            self.tokens_decimals[token_id] = pow(10, self.__get_token_decimals_with_name(erc_token, token_id))
+        elif tokentype == ERC1155_NAME:
             erc_token = erc1155slot(self._w3.eth.contract(Web3.toChecksumAddress(address), abi=contract["abi"]))
-            self.tokens_decimals[name] = 0
+            self.tokens_decimals[token_id] = 0
+        else:
+            raise Exception("{} is invalied.".format(tokentype))
 
-        setattr(self, name, erc_token)
+        setattr(self, token_id, erc_token)
 
-        self.tokens_address[name] = address
-        self.tokens[name] = erc_token 
-        self.tokens_id.append(name)
+        self.tokens_address[token_id] = address
+        self.tokens[token_id] = erc_token 
+        self.tokens_id.append(token_id)
 
-    def token_address(self, name):
-        return self.tokens_address[name]
+    def token_address(self, token_id):
+        return self.tokens_address[token_id]
 
     def is_connected(self):
         return self._w3.isConnected()
@@ -231,6 +234,22 @@ class ethproxy():
 
     def uri(self, token_id):
         return self.tokens[token_id].uri()
+
+    def mint(self, account, token_id, to, id, amount, data = None):
+        calldata = None
+        if self.tokens[token_id].slot_name == ERC1155_NAME:
+            calldata = self.tokens[token_id].raw_transfer_from(accoun.address, to_address, id, amount)
+        else:
+            raise Exception("contract is not support mint")
+
+        return self.send_contract_transaction(account.address, account.key, calldata, nonce = nonce, timeout = timeout) 
+
+
+    def pause(self, token_id):
+        return self.tokens[token_id].pause()
+
+    def unpause(self, token_id):
+        return self.tokens[token_id].unpause()
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
