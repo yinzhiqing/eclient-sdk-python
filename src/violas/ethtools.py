@@ -78,12 +78,12 @@ def show_token_list():
     assert ret.state == error.SUCCEED, "get tokens failed."
     json_print(ret.datas)
 
-def mint_coin(address, amount, token_id, module):
+def mint_coin(address, amount, token_id):
     logger.debug("start mint_coin({address}, {amount}, {token_id}, {module})")
-    print(client.get_balance(address, token_id, module).datas)
+    print(client.get_balance(address, token_id).datas)
 
 
-def send_coin(from_address, to_address, amount, token_id):
+def send_coin_erc20(from_address, to_address, amount, token_id):
     wallet = get_ethwallet()
     ret = wallet.get_account(from_address)
     if ret.state != error.SUCCEED:
@@ -94,6 +94,30 @@ def send_coin(from_address, to_address, amount, token_id):
     ret = client.send_coin_erc20(account, to_address, amount, token_id)
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id).datas}")
+
+def send_coin_erc1155(from_address, to_address, amount, token_id, id):
+    wallet = get_ethwallet()
+    ret = wallet.get_account(from_address)
+    if ret.state != error.SUCCEED:
+        raise Exception("get account failed")
+    account = ret.datas
+
+    client = get_ethclient()
+    ret = client.send_coin_erc1155(account, to_address, amount, token_id, id)
+    assert ret.state == error.SUCCEED, ret.message
+    print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
+
+def mint_nft(manager, to_address, id, amount, token_id = "erc1155",  data = None):
+    wallet = get_ethwallet()
+    ret = wallet.get_account(manager)
+    if ret.state != error.SUCCEED:
+        raise Exception("get account failed")
+    account = ret.datas
+
+    client = get_ethclient()
+    ret = client.mint(account, token_id, to_address, id, amount, data)
+    assert ret.state == error.SUCCEED, ret.message
+    print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
 
 def approve(from_address, to_address, amount, token_id):
     wallet = get_ethwallet()
@@ -113,10 +137,10 @@ def allowance(from_address, to_address, token_id):
     assert ret.state == error.SUCCEED, ret.message
     print(f"allowance balance :{ret.datas}")
 
-def get_balance(address, token_id, **kwargs):
-    logger.debug(f"start get_balance address= {address} token_id= {token_id}")
+def get_balance(address, token_id, id = None):
+    logger.debug(f"start get_balance address= {address} token_id= {token_id}, id = {id}")
     client = get_ethclient()
-    ret = client.get_balance(address, token_id, module)
+    ret = client.get_balance(address, token_id, id = id)
     logger.debug("balance: {0}".format(ret.datas))
 
 def get_decimals(token_id):
@@ -160,6 +184,17 @@ def get_token_id_address(token_id):
     ret = client.get_token_id_address(token_id)
     logger.debug("address: {0}".format(ret.datas))
 
+def get_token_id_uri(token_id):
+    logger.debug("start get_token_id_address({})".format(token_id))
+    client = get_ethclient(False)
+    ret = client.get_token_id_uri(token_id)
+    logger.debug("address: {0}".format(ret.datas))
+
+def get_token_ids(token_id):
+    logger.debug("start get_token_ids({})".format(token_id))
+    client = get_ethclient(False)
+    ret = client.get_token_ids(token_id)
+    logger.debug("totle ids: {0}".format(ret.datas))
 '''
 *************************************************ethwallet oper*******************************************************
 '''
@@ -220,7 +255,8 @@ def init_args(pargs):
     pargs.append(show_accounts_full, "show all counts address list(local wallet) with privkey.")
 
     #client
-    pargs.append(send_coin, "send token(erc20 coin) to target address")
+    pargs.append(send_coin_erc20, "send token(erc20 coin) to target address")
+    pargs.append(send_coin_erc1155, "send token(erc1155 coin) to target address")
     pargs.append(approve, "approve to_address use coin amount from from_address")
     pargs.append(allowance, "request to_address can use coin amount from from_address")
     pargs.append(get_balance, "get address's token(module) amount.")
@@ -231,6 +267,9 @@ def init_args(pargs):
     pargs.append(get_chain_id, "get chain id.")
     pargs.append(show_token_list, "show token list.")
     pargs.append(get_token_id_address, "show token contract address.")
+    pargs.append(get_token_id_uri, "show token id uri.")
+    pargs.append(mint_nft, "mint id of token_id.")
+    pargs.append(get_token_ids, "show ids of token_id.")
 
 def run(argc, argv, exit = True):
     try:

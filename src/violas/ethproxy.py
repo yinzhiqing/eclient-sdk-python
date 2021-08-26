@@ -148,10 +148,10 @@ class ethproxy():
             return self.send_eth_transaction(account.address, account.key, to_address, amount, nonce = nonce, timeout = timeout) 
         else:
             calldata = None
-            if self.tokens[token_id].slot_name == ERC20_NAME:
+            if self.tokens[token_id].slot_name() == ERC20_NAME:
                 calldata = self.tokens[token_id].raw_transfer(to_address, amount)
-            elif self.tokens[token_id].slot_name == ERC1155_NAME:
-                calldata = self.tokens[token_id].raw_transfer_from(accoun.address, to_address, id, amount)
+            elif self.tokens[token_id].slot_name() == ERC1155_NAME:
+                calldata = self.tokens[token_id].raw_transfer_from(account.address, to_address, id, amount)
             else:
                 raise Exception("token_id[{}] is not [{}]".format(token_id, self.tokens_id))
 
@@ -215,14 +215,14 @@ class ethproxy():
     def get_balance(self, address, token_id, *args, **kwargs):
         if token_id == "eth":
             return self._w3.eth.getBalance(address)
-        return self.tokens[token_id].balance_of(address, kwargs)
+        return self.tokens[token_id].balance_of(address, **kwargs)
 
     def get_balances(self, address, *args, **kwargs):
         balances = {}
         for token_id in self.tokens_id:
             id = kwargs.get("id")
             balances.update({"{}{}".format(token_id, "_" + id if id else ""): 
-                self.get_balance(address, token_id, kwargs)})
+                self.get_balance(address, token_id, **kwargs)})
 
         return balances
 
@@ -235,14 +235,14 @@ class ethproxy():
     def uri(self, token_id):
         return self.tokens[token_id].uri()
 
-    def mint(self, account, token_id, to, id, amount, data = None):
+    def mint(self, account, token_id, to_address, id, amount, data = None, timeout = 180):
         calldata = None
-        if self.tokens[token_id].slot_name == ERC1155_NAME:
-            calldata = self.tokens[token_id].raw_transfer_from(accoun.address, to_address, id, amount)
+        if self.tokens[token_id].slot_name() == ERC1155_NAME:
+            calldata = self.tokens[token_id].raw_mint(to_address, id, amount)
         else:
-            raise Exception("contract is not support mint")
+            raise Exception("contract is not support mint. token_id = {} slot_name = {}".format(token_id, self.tokens[token_id].slot_name()))
 
-        return self.send_contract_transaction(account.address, account.key, calldata, nonce = nonce, timeout = timeout) 
+        return self.send_contract_transaction(account.address, account.key, calldata, nonce = None, timeout = timeout) 
 
 
     def pause(self, token_id):
@@ -250,6 +250,13 @@ class ethproxy():
 
     def unpause(self, token_id):
         return self.tokens[token_id].unpause()
+
+    def get_token_ids(self, token_id):
+        ids = []
+        count = self.tokens[token_id].tokenCount()
+        for i in range(count):
+            ids.append(self.tokens[token_id].token_id(i))
+        return ids
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):

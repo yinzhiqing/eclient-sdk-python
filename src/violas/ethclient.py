@@ -298,17 +298,17 @@ class ethclient(baseobject):
         return ret
 
     def send_coin_erc20(self, account, toaddress, amount, token_id, *args, **kwargs):
-        return self.send_coin(account, toaddress, amount, token_id, data= {"type":"mark", "version": None},*args, **kwargs)
+        return self.send_coin(account, toaddress, amount, token_id, data= {"type":"erc20", "version": None},*args, **kwargs)
 
-    def send_coin_1155(self, account, toaddress, amount, token_id, id, *args, **kwargs):
-        return self.send_coin(account, toaddress, amount, token_id, data= {"type":"mark", "version": None}, id = id, *args, **kwargs)
+    def send_coin_erc1155(self, account, toaddress, amount, token_id, id, *args, **kwargs):
+        return self.send_coin(account, toaddress, amount, token_id, data= {"type":"erc1155", "version": None}, id = id, *args, **kwargs)
 
-    def send_coin(self, account, toaddress, amount, token_id, data, id , *args, **kwargs):
+    def send_coin(self, account, toaddress, amount, token_id, data, id = None, *args, **kwargs):
         '''change state 
         '''
         try:
             sender_account = self.map_account(account)
-            if data["type"] == "mark":
+            if data["type"] in ("erc20", "erc1155"):
                 datas = self.__client.send_token(sender_account, toaddress, amount, token_id, id = id)
             else:
                 raise Exception(f"type{type} is invald.")
@@ -325,6 +325,13 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def get_token_ids(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.get_token_ids(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def get_chain_id(self):
         try:
             ret = result(error.SUCCEED, datas = self.__client.get_chain_id())
@@ -332,17 +339,9 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
-    def mint(self, token_id, id, amount, data = None):
-        '''change state 
-        '''
+    def mint(self, account, token_id, to, id, amount, data = None):
         try:
-            sender_account = self.map_account(account)
-            if data["type"] in ("end", "stop"):
-                datas = self.__client.update_proof_state(sender_account, data["version"], data["type"])
-            elif data["type"] == "mark":
-                datas = self.__client.send_token(sender_account, toaddress, amount, token_id)
-            else:
-                raise Exception(f"type{type} is invald.")
+            datas = self.__client.mint(account, token_id, to, id = id, amount = amount, data = data)
             ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
             self._logger.debug(f"result: {ret.datas}")
         except Exception as e:
@@ -353,6 +352,13 @@ class ethclient(baseobject):
     def get_token_id_address(self, token_id):
         try:
             ret = result(error.SUCCEED, datas = self.__client.token_address(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def get_token_id_uri(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.uri(token_id))
         except Exception as e:
             ret = parse_except(e)
         return ret

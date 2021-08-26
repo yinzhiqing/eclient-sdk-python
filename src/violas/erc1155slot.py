@@ -12,7 +12,7 @@ class erc1155slot():
         self._contract = contract
         self._name = name
 
-    def slot_name():
+    def slot_name(self):
         return self._name
 
     def name(self):
@@ -28,22 +28,26 @@ class erc1155slot():
         return self._contract.functions.tokenCount().call()
 
     def tokenTotleAmount(self, id):
+        id = self.__convert_to_int(id)
         return self._contract.functions.tokenTotleAmount(id).call()
 
     def token_id(self, index):
-        return self._contract.functions.tokenId(index).call()
+        return self.__convert_to_hex(self._contract.functions.tokenId(index).call())
 
     def token_exists(self, id):
+        id = self.__convert_to_int(id)
         return self._contract.functions.tokenExists(id).call()
 
     def uri(self):
-        return self._contract.functions.uri().call()
+        return self._contract.functions.uri(0).call()
 
     def balance_of(self, account, **kwargs):
-        return self._contract.functions.balanceOf(Web3.toChecksumAddress(account), kwargs.get("id")).call()
+        id = self.__convert_to_int(kwargs.get("id"))
+        return self._contract.functions.balanceOf(Web3.toChecksumAddress(account), id).call()
 
     def balance_of_batch(self, accounts, **kwargs):
-        return self._contract.functions.balanceOfBatch(accounts, kwargs.get("ids")).call()
+        ids = self.__convert_ids(kwargs.get("ids"))
+        return self._contract.functions.balanceOfBatch(accounts, ids).call()
 
     def approve(self, spender, approved):
         return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), approved).call()
@@ -58,26 +62,53 @@ class erc1155slot():
         return self._contract.functions.unpause().call()
 
     def raw_transfer_from(self, fom, to, id, amount, data = None):
+        id = self.__convert_to_int(id)
+        data = b'' if not data else data
         return self._contract.functions.safeTransferFrom(fom, to, id, amount, data)
 
     def raw_transfer_from_batch(self, fom, to, ids, amounts, data = None):
+        ids = self.__convert_ids(ids)
+        data = b'' if not data else data
         return self._contract.functions.safeBatchTransferFrom(fom, to, ids, amounts, data)
 
     def raw_approve(self, spender, value):
         return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), value)
 
-    def raw_mint(to, id, amount, data = None):
+    def raw_mint(self, to, id, amount, data = None):
+        id      = self.__convert_to_int(id)
+        amount  = self.__convert_to_int(amount)
+        data = b'' if not data else data
         return self._contract.functions.mint(to, id, amount, data)
 
-    def raw_mint_batch(to, ids, amounts, data = None):
+    def raw_mint_batch(self, to, ids, amounts, data = None):
+        ids = self.__convert_ids(ids)
         return self._contract.functions.mintBatch(to, ids, amounts, data)
 
-    def raw_burn(account, id, amount):
+    def raw_burn(self, account, id, amount):
+        id = self.__convert_to_int(id)
         return self._contract.functions.burn(account, id, amount)
 
-    def raw_burn_batch(account, ids, amounts):
+    def raw_burn_batch(self, account, ids, amounts):
+        ids = self.__convert_ids(ids)
         return self._contract.functions.burnBatch(account, ids, amounts)
    
+#*************************************internal********************************************#
+    def __convert_to_int(self, value):
+        if value and isinstance(value, str):
+            value = Web3.toInt(hexstr = value)
+        return value
+
+    def __convert_to_hex(self, value):
+        if value and not isinstance(value, str):
+            value = Web3.toHex(value)
+        return value
+
+    def __convert_ids(self, ids):
+        uids = []
+        for id in ids:
+            uids.append(self.__convert_to_int(id))
+        return uids
+
 def test():
 
     host = "https://kovan.infura.io/v3/2645261bd8844d0c9ac042c84606502d"

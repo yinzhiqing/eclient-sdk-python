@@ -12,7 +12,7 @@ class erc20slot():
         self._contract = contract
         self._name = name
 
-    def slot_name():
+    def slot_name(self):
         return self._name
 
     def name(self):
