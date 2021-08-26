@@ -1,6 +1,6 @@
 import logging
 import logging.config
-import log.config
+from . import config
 import os,sys
 import threading
 

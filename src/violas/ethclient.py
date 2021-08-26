@@ -6,8 +6,7 @@ import os
 sys.path.append(os.getcwd())
 sys.path.append("{}".format(os.getcwd()))
 sys.path.append("..")
-import log
-import log.logger
+from .log import logger
 import traceback
 import datetime
 import comm
@@ -21,7 +20,7 @@ from comm.functions import (
         is_mnemonic,
         output_args
         )
-from ethproxy import (
+from .ethproxy import (
         ethproxy as clientproxy,
         walletproxy,
         contract_codes,

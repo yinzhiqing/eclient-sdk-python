@@ -1,4 +1,4 @@
-from ethclient import (
+from .ethclient import (
         ethclient, 
         ethwallet,
         ERC1155_NAME,
