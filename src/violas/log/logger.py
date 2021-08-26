@@ -24,16 +24,16 @@ def getLogger(name, path = None):
     if not os.path.exists(log_path):
         os.makedirs(log_path)
 
-    hfile = dict(log.config.config["handlers"]["file"])
+    hfile = dict(config.config["handlers"]["file"])
     hfile["filename"]=f"{log_path}/{name}.log"
-    log.config.config["handlers"].update({name:hfile})
-    default = log.config.config.get("loggers").get("bvelog")
-    if name not in log.config.config.get("loggers"):
+    config.config["handlers"].update({name:hfile})
+    default = config.config.get("loggers").get("bvelog")
+    if name not in config.config.get("loggers"):
         new_logger = dict(default)
         new_logger["handlers"] = ["console", name]
-        log.config.config["loggers"].update({name:new_logger})
+        config.config["loggers"].update({name:new_logger})
 
-    logging.config.dictConfig(log.config.config)
+    logging.config.dictConfig(config.config)
     logger = logging.getLogger(name)
     lock.release()
 

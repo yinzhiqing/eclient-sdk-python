@@ -9,17 +9,7 @@ sys.path.append("..")
 from .log import logger
 import traceback
 import datetime
-import comm
-import comm.error
-import comm.result
-import comm.values
-from comm import version
-from comm.result import result, parse_except
-from comm.error import error
-from comm.functions import (
-        is_mnemonic,
-        output_args
-        )
+from .comm import *
 from .ethproxy import (
         ethproxy as clientproxy,
         walletproxy,
@@ -41,7 +31,6 @@ from comm.values import (
 name="eclient"
 
 
-ETH_ADDRESS_LEN = comm.values.ETH_ADDRESS_LEN
 class ethwallet(baseobject):
     
     def __init__(self, name, wallet, chain="ethereum", main_address = None):

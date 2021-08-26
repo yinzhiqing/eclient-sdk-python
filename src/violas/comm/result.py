@@ -6,8 +6,8 @@ sys.path.append("..")
 import traceback
 import log
 import log.logger
+from .error import error
 name="result"
-error = error.error
 name="except" 
 class result:
         state = error.SUCCEED
