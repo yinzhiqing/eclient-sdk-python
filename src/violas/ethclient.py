@@ -313,6 +313,13 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def get_token_ids_count(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.get_token_ids_count(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def get_token_ids(self, token_id):
         try:
             ret = result(error.SUCCEED, datas = self.__client.get_token_ids(token_id))
