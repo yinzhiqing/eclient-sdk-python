@@ -101,7 +101,7 @@ class erc1155slot():
     def __convert_to_hex(self, value):
         if value and not isinstance(value, str):
             value = Web3.toHex(value)
-        return value
+        return value[2:]
 
     def __convert_ids(self, ids):
         uids = []
