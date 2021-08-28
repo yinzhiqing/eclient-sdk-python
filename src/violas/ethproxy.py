@@ -254,11 +254,16 @@ class ethproxy():
     def get_token_ids_count(self, token_id):
         return self.tokens[token_id].tokenCount()
 
-    def get_token_ids(self, token_id):
+    def get_token_ids(self, token_id, start = 0, limit = sys.maxsize):
         ids = []
         count = self.get_token_ids_count(token_id)
         for i in range(count):
-            ids.append(self.tokens[token_id].token_id(i))
+            if i >= start + limit:
+                break
+
+            if i >= start:
+                ids.append(self.tokens[token_id].token_id(i))
+
         return ids
 
     def __getattr__(self, name):

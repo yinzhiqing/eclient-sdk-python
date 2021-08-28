@@ -320,9 +320,9 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
-    def get_token_ids(self, token_id):
+    def get_token_ids(self, token_id, start = 0, limit = sys.maxsize):
         try:
-            ret = result(error.SUCCEED, datas = self.__client.get_token_ids(token_id))
+            ret = result(error.SUCCEED, datas = self.__client.get_token_ids(token_id, start, limit))
         except Exception as e:
             ret = parse_except(e)
         return ret

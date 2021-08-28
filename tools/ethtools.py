@@ -173,10 +173,10 @@ def get_token_id_uri(token_id):
     ret = client.get_token_id_uri(token_id)
     logger.debug("address: {0}".format(ret.datas))
 
-def get_token_ids(token_id):
-    logger.debug("start get_token_ids({})".format(token_id))
+def get_token_ids(token_id, start = 0, limit = sys.maxsize):
+    logger.debug("start get_token_ids({}, {}, {})".format(token_id, start, limit))
     client = get_ethclient(False)
-    ret = client.get_token_ids(token_id)
+    ret = client.get_token_ids(token_id, start = start, limit = limit)
     logger.debug("totle ids: {0}".format(ret.datas))
 
 def get_token_ids_count(token_id):
