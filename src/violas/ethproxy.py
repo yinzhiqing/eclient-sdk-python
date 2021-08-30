@@ -262,7 +262,7 @@ class ethproxy():
                 break
 
             if i >= start:
-                ids.append(self.tokens[token_id].token_id(i))
+                ids.append(dict(index = i, id = self.tokens[token_id].token_id(i)))
 
         return ids
 
