@@ -27,7 +27,7 @@ class erc1155slot():
     def tokenCount(self):
         return self._contract.functions.tokenCount().call()
 
-    def tokenTotleAmount(self, id):
+    def tokenTotalAmount(self, id):
         id = self.__convert_to_int(id)
         return self._contract.functions.tokenTotleAmount(id).call()
 

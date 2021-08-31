@@ -254,6 +254,9 @@ class ethproxy():
     def get_token_ids_count(self, token_id):
         return self.tokens[token_id].tokenCount()
 
+    def get_token_id_total_amount(self, token_id, id):
+        return self.tokens[token_id].tokenTotalAmount(id)
+
     def get_token_ids(self, token_id, start = 0, limit = sys.maxsize):
         ids = []
         count = self.get_token_ids_count(token_id)

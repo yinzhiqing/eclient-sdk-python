@@ -358,6 +358,13 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def get_token_id_total_amount(self, token_id, id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.get_token_id_total_amount(token_id, id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
             # Python internal stuff

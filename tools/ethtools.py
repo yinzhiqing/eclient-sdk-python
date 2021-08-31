@@ -184,6 +184,12 @@ def get_token_ids_count(token_id):
     client = get_ethclient(False)
     ret = client.get_token_ids_count(token_id)
     logger.debug("totle ids count: {0}".format(ret.datas))
+
+def get_token_id_total_amount(id, token_id = "erc1155"):
+    logger.debug("start get_token_id_total_amount({}, {})".format(token_id, id))
+    client = get_ethclient(False)
+    ret = client.get_token_id_total_amount(token_id, id)
+    logger.debug("totle amount: {0}".format(ret.datas))
 '''
 *************************************************ethwallet oper*******************************************************
 '''
@@ -260,6 +266,7 @@ def init_args(pargs):
     pargs.append(mint_nft, "mint id of token_id.")
     pargs.append(get_token_ids, "show ids of token_id.")
     pargs.append(get_token_ids_count, "show ids count of token_id.")
+    pargs.append(get_token_id_total_amount, "show id total count of token_id.")
 
 def run(argc, argv, exit = True):
     try:
