@@ -179,6 +179,12 @@ def get_token_ids(token_id, start = 0, limit = sys.maxsize):
     ret = client.get_token_ids(token_id, start = start, limit = limit)
     logger.debug("totle ids: {0}".format(ret.datas))
 
+def get_token_fields(id, token_id = "erc1155"):
+    logger.debug("start get_token_fields({})".format(token_id))
+    client = get_ethclient(False)
+    ret = client.get_token_fields(token_id,id)
+    logger.debug("address: {0}".format(ret.datas))
+
 def get_token_ids_count(token_id):
     logger.debug("start get_token_ids_count({})".format(token_id))
     client = get_ethclient(False)
@@ -267,6 +273,7 @@ def init_args(pargs):
     pargs.append(get_token_ids, "show ids of token_id.")
     pargs.append(get_token_ids_count, "show ids count of token_id.")
     pargs.append(get_token_id_total_amount, "show id total count of token_id.")
+    pargs.append(get_token_fields, "show id field info of token_id.")
 
 def run(argc, argv, exit = True):
     try:

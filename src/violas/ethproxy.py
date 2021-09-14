@@ -270,7 +270,6 @@ class ethproxy():
             if i >= start:
                 id  = self.tokens[token_id].token_id(i)
                 ifs = idfields(id)
-                json_print(ifs.to_json())
                 ids.append(dict(
                     index   = i, 
                     id      = id,
@@ -285,6 +284,18 @@ class ethproxy():
                 )
 
         return ids
+
+    def get_token_fields(self, token_id, id):
+        ifs = idfields(id)
+        return dict(
+            brand   = self.tokens[token_id].brand_name(ifs.brand),
+            btype   = self.tokens[token_id].type_name(ifs.btype),
+            quality = self.tokens[token_id].quality_name(ifs.quality),
+            nfttype = self.tokens[token_id].nfttype_name(ifs.nfttype),
+            issubtoken      = ifs.issubtoken,
+            quality_index   = ifs.quality_index,
+            parent_token    = ifs.parent_token
+            )
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
