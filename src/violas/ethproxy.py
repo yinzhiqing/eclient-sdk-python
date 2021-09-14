@@ -276,7 +276,7 @@ class ethproxy():
                     brand   = self.tokens[token_id].brand_name(ifs.brand),
                     btype   = self.tokens[token_id].type_name(ifs.btype),
                     quality = self.tokens[token_id].quality_name(ifs.quality),
-                    nfttype = self.tokens[token_id].nfttype_name(ifs.nfttype),
+                    token_type = self.tokens[token_id].nfttype_name(ifs.nfttype),
                     issubtoken      = ifs.issubtoken,
                     quality_index   = ifs.quality_index,
                     parent_token    = ifs.parent_token
@@ -291,7 +291,7 @@ class ethproxy():
             brand   = self.tokens[token_id].brand_name(ifs.brand),
             btype   = self.tokens[token_id].type_name(ifs.btype),
             quality = self.tokens[token_id].quality_name(ifs.quality),
-            nfttype = self.tokens[token_id].nfttype_name(ifs.nfttype),
+            token_type = self.tokens[token_id].nfttype_name(ifs.nfttype),
             issubtoken      = ifs.issubtoken,
             quality_index   = ifs.quality_index,
             parent_token    = ifs.parent_token
