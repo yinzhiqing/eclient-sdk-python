@@ -20,7 +20,10 @@ from comm.error import error
 from enum import Enum
 from comm.functions import json_print
 from erc20slot import erc20slot 
-from erc1155slot import erc1155slot 
+from erc1155slot import (
+        erc1155slot,
+        idfields,
+        )
 from lbethwallet import lbethwallet
 from metafiles import (
         erc1155_abi as erc1155_std_abi,
@@ -265,7 +268,21 @@ class ethproxy():
                 break
 
             if i >= start:
-                ids.append(dict(index = i, id = self.tokens[token_id].token_id(i)))
+                id  = self.tokens[token_id].token_id(i)
+                ifs = idfields(id)
+                json_print(ifs.to_json())
+                ids.append(dict(
+                    index   = i, 
+                    id      = id,
+                    brand   = self.tokens[token_id].brand_name(ifs.brand),
+                    btype   = self.tokens[token_id].type_name(ifs.btype),
+                    quality = self.tokens[token_id].quality_name(ifs.quality),
+                    nfttype = self.tokens[token_id].nfttype_name(ifs.nfttype),
+                    issubtoken      = ifs.issubtoken,
+                    quality_index   = ifs.quality_index,
+                    parent_token    = ifs.parent_token
+                    )
+                )
 
         return ids
 
@@ -277,6 +294,7 @@ class ethproxy():
         
     def __call__(self, *args, **kwargs):
         pass
+
 
 
 def main():

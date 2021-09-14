@@ -7,6 +7,77 @@ sys.path.append(f"..")
 import web3
 from web3 import Web3
 
+class idfields():
+    def __init__(self, id):
+        self.__parse(id)
+
+    def to_json(self):
+        return dict(
+                mark    = self.mark,
+                version = self.version,
+                reserve = self.reserve,
+                brand   = self.brand,
+                btype   = self.btype,
+                quality = self.quality,
+                nfttype = self.nfttype,
+                quality_index   = self.quality_index,
+                subtoken_index  = self.subtoken_index,
+                issubtoken      = self.issubtoken,
+                parent_token    = self.parent_token,
+                id = self.id
+                )
+
+    def __parse(self, id):
+        id = self.__convert_to_hex(id)
+        setattr(self, "id", id)
+        setattr(self, "mark", id[0:16])
+        setattr(self, "version", id[16:24])
+        setattr(self, "reserve", id[24:28])
+        setattr(self, "brand", id[28:36])
+        setattr(self, "btype", id[36:40])
+        setattr(self, "quality", id[40:44])
+        setattr(self, "nfttype", id[44:48])
+        setattr(self, "quality_index", id[48:56])
+        setattr(self, "subtoken_index", id[56:])
+        setattr(self, "issubtoken", self.__convert_to_int(id[56:]) > 0)
+        setattr(self, "parent_token", self.__parent_token())
+
+
+    def __parent_token(self):
+        mark    = self.mark
+        version = self.version
+        reserve = self.reserve
+        brand   = self.brand
+        btype   = self.btype
+        quality = self.quality
+        nfttype = self.nfttype
+        quality_index   = self.quality_index
+        subtoken_index  = self.subtoken_index
+        issubtoken      = self.issubtoken
+
+        if issubtoken:
+            subtoken_index  = ''.join(['0' for i in subtoken_index])
+        elif self.__convert_to_int(quality) > 0:
+            quality         = ''.join(['0' for i in quality])
+            nfttype         = ''.join(['0' for i in nfttype])
+            quality_index   = ''.join(['0' for i in quality_index])
+        elif self.__convert_to_int(btype) > 0:
+            btype           = ''.join(['0' for i in btype])
+        else:
+            return ""
+
+        return mark + version + reserve + brand + btype + quality + nfttype + quality_index + subtoken_index
+
+    def __convert_to_int(self, value):
+        if value and isinstance(value, str):
+            value = Web3.toInt(hexstr = value)
+        return value
+
+    def __convert_to_hex(self, value):
+        if value and not isinstance(value, str):
+            value = Web3.toHex(value)
+        return value[2:] if value.lower().startswith("0x") else value
+
 class erc1155slot():
     def __init__(self, contract, name = "erc1155"):
         self._contract = contract
@@ -48,6 +119,54 @@ class erc1155slot():
     def balance_of_batch(self, accounts, **kwargs):
         ids = self.__convert_ids(kwargs.get("ids"))
         return self._contract.functions.balanceOfBatch(accounts, ids).call()
+
+    def brand_count(self):
+        return self._contract.functions.brandCount().call()
+
+    def brand_name(self, id):
+        id = self.__convert_to_int(id)
+        return self._contract.functions.brandName(id).call()
+
+    def brand_id(self, name):
+        return self.__convert_to_hex(self._contract.functions.brandId(name).call())
+
+    def type_count(self):
+        return self._contract.functions.typeCount().call()
+
+    def type_name(self, id):
+        id = self.__convert_to_int(id)
+        return self._contract.functions.typeName(id).call()
+
+    def type_id(self, name):
+        return self.__convert_to_hex(self._contract.functions.typeId(name).call())
+
+    def quality_count(self):
+        return self._contract.functions.qualityCount().call()
+
+    def quality_name(self, id):
+        id = self.__convert_to_int(id)
+        return self._contract.functions.qualityName(id).call()
+
+    def quality_id(self, name):
+        return self.__convert_to_hex(self._contract.functions.qualityId(name).call())
+
+    def nftType_count(self):
+        return self._contract.functions.nftTypeCount().call()
+
+    def nfttype_name(self, id):
+        id = self.__convert_to_int(id)
+        return self._contract.functions.nftTypeName(id).call()
+
+    def nftType_id(self, name):
+        return self.__convert_to_hex(self._contract.functions.nftTypeId(name).call())
+
+    def is_Blind_Box(self, nfttype):
+        nfttype = self.__convert_to_int(nfttype)
+        return self._contract.functions.isBlindBox(nfttype).call()
+
+    def is_exchange(self, nfttype):
+        nfttype = self.__convert_to_int(nfttype)
+        return self._contract.functions.isExchange(nfttype).call()
 
     def approve(self, spender, approved):
         return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), approved).call()
@@ -92,6 +211,8 @@ class erc1155slot():
         ids = self.__convert_ids(ids)
         return self._contract.functions.burnBatch(account, ids, amounts)
    
+
+
 #*************************************internal********************************************#
     def __convert_to_int(self, value):
         if value and isinstance(value, str):
@@ -101,7 +222,7 @@ class erc1155slot():
     def __convert_to_hex(self, value):
         if value and not isinstance(value, str):
             value = Web3.toHex(value)
-        return value[2:]
+        return value[2:] if value.lower().startswith("0x") else value
 
     def __convert_ids(self, ids):
         uids = []
