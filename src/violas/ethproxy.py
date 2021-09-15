@@ -269,19 +269,9 @@ class ethproxy():
 
             if i >= start:
                 id  = self.tokens[token_id].token_id(i)
-                ifs = idfields(id)
-                ids.append(dict(
-                    index   = i, 
-                    id      = id,
-                    brand   = self.tokens[token_id].brand_name(ifs.brand),
-                    btype   = self.tokens[token_id].type_name(ifs.btype),
-                    quality = self.tokens[token_id].quality_name(ifs.quality),
-                    token_type = self.tokens[token_id].nfttype_name(ifs.nfttype),
-                    issubtoken      = ifs.issubtoken,
-                    quality_index   = ifs.quality_index,
-                    parent_token    = ifs.parent_token
-                    )
-                )
+                fields = self.get_token_fields(token_id, id)
+                fields.update({"index": i, "id": id})
+                ids.append(fields)
 
         return ids
 
@@ -294,7 +284,10 @@ class ethproxy():
             token_type = self.tokens[token_id].nfttype_name(ifs.nfttype),
             issubtoken      = ifs.issubtoken,
             quality_index   = ifs.quality_index,
-            parent_token    = ifs.parent_token
+            parent_token    = ifs.parent_token,
+            brand_code      = ifs.brand,
+            type_code       = ifs.btype,
+            level_code      = ifs.quality
             )
 
     def __getattr__(self, name):
