@@ -167,6 +167,7 @@ class ethproxy():
         if not nonce:
             nonce = self._w3.eth.getTransactionCount(Web3.toChecksumAddress(sender))
 
+        print(sender)
         if not gas:
             if calldata:
                 gas = calldata.estimateGas({"from":sender})
@@ -244,6 +245,15 @@ class ethproxy():
             calldata = self.tokens[token_id].raw_mint(to_address, id, amount)
         else:
             raise Exception("contract is not support mint. token_id = {} slot_name = {}".format(token_id, self.tokens[token_id].slot_name()))
+
+        return self.send_contract_transaction(account.address, account.key, calldata, nonce = None, timeout = timeout) 
+
+    def exchange_blind_box(self, account, token_id, to_address, id, data = None, timeout = 180):
+        calldata = None
+        if self.tokens[token_id].slot_name() == ERC1155_NAME:
+            calldata = self.tokens[token_id].raw_exchange_blind_box(to_address, id, data)
+        else:
+            raise Exception("contract is not support exchange. token_id = {} slot_name = {}".format(token_id, self.tokens[token_id].slot_name()))
 
         return self.send_contract_transaction(account.address, account.key, calldata, nonce = None, timeout = timeout) 
 

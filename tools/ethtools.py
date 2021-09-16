@@ -102,6 +102,18 @@ def mint_nft(manager, to_address, id, amount, token_id = "erc1155",  data = None
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
 
+def exchange_blind_box(manager, to_address, id, token_id = "erc1155",  data = None):
+    wallet = get_ethwallet()
+    ret = wallet.get_account(manager)
+    if ret.state != error.SUCCEED:
+        raise Exception("get account failed")
+    account = ret.datas
+
+    client = get_ethclient()
+    ret = client.exchange_blind_box(account, token_id, to_address, id, data)
+    assert ret.state == error.SUCCEED, ret.message
+    print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
+
 def approve(from_address, to_address, amount, token_id):
     wallet = get_ethwallet()
     ret = wallet.get_account(from_address)
@@ -274,6 +286,7 @@ def init_args(pargs):
     pargs.append(get_token_ids_count, "show ids count of token_id.")
     pargs.append(get_token_id_total_amount, "show id total count of token_id.")
     pargs.append(get_token_fields, "show id field info of token_id.")
+    pargs.append(exchange_blind_box, "exchange blind box.")
 
 def run(argc, argv, exit = True):
     try:

@@ -57,6 +57,9 @@ class idfields():
 
         if issubtoken:
             subtoken_index  = ''.join(['0' for i in subtoken_index])
+            #临时转换一下 tmp_set
+            if self.__convert_to_int(nfttype) == 2:
+                nfttype = "0001"
         elif self.__convert_to_int(quality) > 0:
             quality         = ''.join(['0' for i in quality])
             nfttype         = ''.join(['0' for i in nfttype])
@@ -95,6 +98,61 @@ class erc1155slot():
     def decimals(self):
         return 0
 
+    def uri(self):
+        return self._contract.functions.uri(0).call()
+
+    def balance_of(self, account, **kwargs):
+        id = self.__convert_to_int(kwargs.get("id"))
+        return self._contract.functions.balanceOf(Web3.toChecksumAddress(account), id).call()
+
+    def balance_of_batch(self, accounts, **kwargs):
+        ids = self.__convert_ids(kwargs.get("ids"))
+        return self._contract.functions.balanceOfBatch(accounts, ids).call()
+
+    def approve(self, spender, approved):
+        return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), approved).call()
+
+    def allowance(self, owner, spender):
+        return self._contract.functions.isApprovalForAll(Web3.toChecksumAddress(owner), Web3.toChecksumAddress(spender)).call()
+    
+    def pause(self):
+        return self._contract.functions.pause().call()
+
+    def unpause(self):
+        return self._contract.functions.unpause().call()
+
+    def raw_transfer_from(self, fom, to, id, amount, data = None):
+        id = self.__convert_to_int(id)
+        data = b'' if not data else data
+        return self._contract.functions.safeTransferFrom(fom, to, id, amount, data)
+
+    def raw_transfer_from_batch(self, fom, to, ids, amounts, data = None):
+        ids = self.__convert_ids(ids)
+        data = b'' if not data else data
+        return self._contract.functions.safeBatchTransferFrom(fom, to, ids, amounts, data)
+
+    def raw_approve(self, spender, value):
+        return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), value)
+
+    def raw_mint(self, to, id, amount, data = None):
+        id      = self.__convert_to_int(id)
+        amount  = self.__convert_to_int(amount)
+        data = b'' if not data else data
+        return self._contract.functions.mint(to, id, amount, data)
+
+    def raw_mint_batch(self, to, ids, amounts, data = None):
+        ids = self.__convert_ids(ids)
+        return self._contract.functions.mintBatch(to, ids, amounts, data)
+
+    def raw_burn(self, account, id, amount):
+        id = self.__convert_to_int(id)
+        return self._contract.functions.burn(account, id, amount)
+
+    def raw_burn_batch(self, account, ids, amounts):
+        ids = self.__convert_ids(ids)
+        return self._contract.functions.burnBatch(account, ids, amounts)
+   
+    #------------------------------- self interface ------------------------------------
     def tokenCount(self):
         return self._contract.functions.tokenCount().call()
 
@@ -108,17 +166,6 @@ class erc1155slot():
     def token_exists(self, id):
         id = self.__convert_to_int(id)
         return self._contract.functions.tokenExists(id).call()
-
-    def uri(self):
-        return self._contract.functions.uri(0).call()
-
-    def balance_of(self, account, **kwargs):
-        id = self.__convert_to_int(kwargs.get("id"))
-        return self._contract.functions.balanceOf(Web3.toChecksumAddress(account), id).call()
-
-    def balance_of_batch(self, accounts, **kwargs):
-        ids = self.__convert_ids(kwargs.get("ids"))
-        return self._contract.functions.balanceOfBatch(accounts, ids).call()
 
     def brand_count(self):
         return self._contract.functions.brandCount().call()
@@ -168,50 +215,10 @@ class erc1155slot():
         nfttype = self.__convert_to_int(nfttype)
         return self._contract.functions.isExchange(nfttype).call()
 
-    def approve(self, spender, approved):
-        return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), approved).call()
-
-    def allowance(self, owner, spender):
-        return self._contract.functions.isApprovalForAll(Web3.toChecksumAddress(owner), Web3.toChecksumAddress(spender)).call()
-    
-    def pause(self):
-        return self._contract.functions.pause().call()
-
-    def unpause(self):
-        return self._contract.functions.unpause().call()
-
-    def raw_transfer_from(self, fom, to, id, amount, data = None):
-        id = self.__convert_to_int(id)
-        data = b'' if not data else data
-        return self._contract.functions.safeTransferFrom(fom, to, id, amount, data)
-
-    def raw_transfer_from_batch(self, fom, to, ids, amounts, data = None):
-        ids = self.__convert_ids(ids)
-        data = b'' if not data else data
-        return self._contract.functions.safeBatchTransferFrom(fom, to, ids, amounts, data)
-
-    def raw_approve(self, spender, value):
-        return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), value)
-
-    def raw_mint(self, to, id, amount, data = None):
+    def raw_exchange_blind_box(self, to, id, data = None):
         id      = self.__convert_to_int(id)
-        amount  = self.__convert_to_int(amount)
         data = b'' if not data else data
-        return self._contract.functions.mint(to, id, amount, data)
-
-    def raw_mint_batch(self, to, ids, amounts, data = None):
-        ids = self.__convert_ids(ids)
-        return self._contract.functions.mintBatch(to, ids, amounts, data)
-
-    def raw_burn(self, account, id, amount):
-        id = self.__convert_to_int(id)
-        return self._contract.functions.burn(account, id, amount)
-
-    def raw_burn_batch(self, account, ids, amounts):
-        ids = self.__convert_ids(ids)
-        return self._contract.functions.burnBatch(account, ids, amounts)
-   
-
+        return self._contract.functions.exchangeBlindBox(Web3.toChecksumAddress(to), id, data)
 
 #*************************************internal********************************************#
     def __convert_to_int(self, value):
