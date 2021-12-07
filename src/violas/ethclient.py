@@ -350,6 +350,14 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def exchange_blind_box(self, account, token_id, to, id, data = None):
+        try:
+            datas = self.__client.exchange_blind_box(account, token_id, to, id = id, data = data)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
 
     def get_token_id_address(self, token_id):
         try:

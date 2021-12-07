@@ -57,6 +57,9 @@ class idfields():
 
         if issubtoken:
             subtoken_index  = ''.join(['0' for i in subtoken_index])
+            #临时转换一下 tmp_set
+            if self.__convert_to_int(nfttype) == 2:
+                nfttype = "0001"
         elif self.__convert_to_int(quality) > 0:
             quality         = ''.join(['0' for i in quality])
             nfttype         = ''.join(['0' for i in nfttype])
@@ -94,6 +97,17 @@ class erc1155slot():
 
     def decimals(self):
         return 0
+
+    def uri(self):
+        return self._contract.functions.uri(0).call()
+
+    def balance_of(self, account, **kwargs):
+        id = self.__convert_to_int(kwargs.get("id"))
+        return self._contract.functions.balanceOf(Web3.toChecksumAddress(account), id).call()
+
+    def balance_of_batch(self, accounts, **kwargs):
+        ids = self.__convert_ids(kwargs.get("ids"))
+        return self._contract.functions.balanceOfBatch(accounts, ids).call()
 
     def approve(self, spender, approved):
         return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), approved).call()
@@ -137,7 +151,6 @@ class erc1155slot():
     def raw_burn_batch(self, account, ids, amounts):
         ids = self.__convert_ids(ids)
         return self._contract.functions.burnBatch(account, ids, amounts)
-   
 
 #*************************************extende********************************************
     def tokenCount(self):
@@ -153,17 +166,6 @@ class erc1155slot():
     def token_exists(self, id):
         id = self.__convert_to_int(id)
         return self._contract.functions.tokenExists(id).call()
-
-    def uri(self):
-        return self._contract.functions.uri(0).call()
-
-    def balance_of(self, account, **kwargs):
-        id = self.__convert_to_int(kwargs.get("id"))
-        return self._contract.functions.balanceOf(Web3.toChecksumAddress(account), id).call()
-
-    def balance_of_batch(self, accounts, **kwargs):
-        ids = self.__convert_ids(kwargs.get("ids"))
-        return self._contract.functions.balanceOfBatch(accounts, ids).call()
 
     def brand_count(self):
         return self._contract.functions.brandCount().call()
@@ -225,14 +227,17 @@ class erc1155slot():
     def raw_mint_sub_token(to, qualityid, amount, data):
         return self._contract.functions.mintSubToken(to, qualityid, amount, data)
 
-    def raw_exchange_blindbox(self, to, id, data):
-        return self._contract.functions.exchangeBlindBox(to, id, data)
+    def raw_exchange_blind_box(self, to, id, data = None):
+        id      = self.__convert_to_int(id)
+        data = b'' if not data else data
+        return self._contract.functions.exchangeBlindBox(Web3.toChecksumAddress(to), id, data)
 
-    def raw_append_blindbox_id(self, nfttype):
+    def raw_append_blind_box_id(self, nfttype):
         return self._contract.functions.appendBlindBoxId(nfttype)
     
-    def raw_cancel_blindbox_id(self, nfttype):
+    def raw_cancel_blind_box_id(self, nfttype):
         return self._contract.functions.cancelBlindBoxId(nfttype)
+
 #*************************************internal********************************************#
     def __convert_to_int(self, value):
         if value and isinstance(value, str):
