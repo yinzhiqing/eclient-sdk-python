@@ -239,6 +239,13 @@ class ethproxy():
     def uri(self, token_id):
         return self.tokens[token_id].uri()
 
+    def _slot_cli(self, token_id):
+        if self.tokens[token_id].slot_name() == ERC1155_NAME:
+            return self.tokens[token_id]
+        else:
+            raise Exception("contract is not support. token_id = {} slot_name = {}".format(token_id, self.tokens[token_id].slot_name()))
+
+
     def mint(self, account, token_id, to_address, id, amount, data = None, timeout = 180):
         calldata = None
         if self.tokens[token_id].slot_name() == ERC1155_NAME:
@@ -247,16 +254,6 @@ class ethproxy():
             raise Exception("contract is not support mint. token_id = {} slot_name = {}".format(token_id, self.tokens[token_id].slot_name()))
 
         return self.send_contract_transaction(account.address, account.key, calldata, nonce = None, timeout = timeout) 
-
-    def exchange_blind_box(self, account, token_id, to_address, id, data = None, timeout = 180):
-        calldata = None
-        if self.tokens[token_id].slot_name() == ERC1155_NAME:
-            calldata = self.tokens[token_id].raw_exchange_blind_box(to_address, id, data)
-        else:
-            raise Exception("contract is not support exchange. token_id = {} slot_name = {}".format(token_id, self.tokens[token_id].slot_name()))
-
-        return self.send_contract_transaction(account.address, account.key, calldata, nonce = None, timeout = timeout) 
-
 
     def pause(self, token_id):
         return self.tokens[token_id].pause()
@@ -301,8 +298,108 @@ class ethproxy():
             )
 
 
+    def token_exists(self, token_id, id):
+        return self._slot_cli(token_id).token_exists(id)
+
+    def brand_count(self, token_id):
+        return self._slot_cli(token_id).brand_count()
+
+    def brand_name(self, token_id, id):
+        return self._slot_cli(token_id).brand_name(id)
+        
+    def brand_id(self, token_id, name):
+        return self._slot_cli(token_id).brand_id(name)
+
+    def type_count(self, token_id):
+        return self._slot_cli(token_id).type_count()
+
+    def type_name(self, token_id, id):
+        return self._slot_cli(token_id).type_name(id)
+
+    def type_id(self, token_id, name):
+        return self._slot_cli(token_id).type_id(name)
+        
+    def quality_count(self, token_id):
+        return self._slot_cli(token_id).quality_count()
+
+    def quality_name(self, token_id, id):
+        return self._slot_cli(token_id).quality_name(id)
+
+    def quality_id(self, token_id, name):
+        return self._slot_cli(token_id).quality_id(name)
+
+    def nfttype_count(self, token_id):
+        return self._slot_cli(token_id).nfttype_count()
+
+    def nfttype_name(self, token_id, id):
+        return self._slot_cli(token_id).nfttype_name(id)
+
+    def nfttype_id(self, token_id, name):
+        return self._slot_cli(token_id).nfttype_id(name)
+
+    def is_blind_box(self, token_id, nfttype):
+        return self._slot_cli(token_id).is_blind_box(nfttype)
+
+    def is_exchange(self, token_id, nfttype):
+        return self._slot_cli(token_id).is_exchange(nfttype)
+
+    def mint_brand(self, account, token_id, to_address, brand, data = None, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_mint_brand(to_address, brand, data)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
+
+    def mint_type(self, account, token_id, to_address, brand, btype, data = None, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_mint_type(to_address, brand, btype, data)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
 
 
+    def mint_quality(self, account, token_id, to_address, brand, btype, quality, nfttype, data = None, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_mint_quality(to_address, brand, btype, quality, data)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
+
+    def mint_sub_token(self, account, token_id, to_address, quality_id, amount, data = None, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_mint_sub_token(to_address, quality_id, amount, data)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
+
+    def exchange_blind_box(self, account, token_id, to_address, id, data = None, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_mint_exchange_blind_box(to_address, id, data)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
+
+
+    def append_blind_box_id(self, account, token_id, to_address, nfttype, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_append_blind_box_id(to_address, nfttype)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
+
+    def cancel_blind_box_id(self, account, token_id, nfttype, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_cancel_blind_box_id(nfttype)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):

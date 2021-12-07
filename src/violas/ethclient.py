@@ -379,13 +379,14 @@ class ethclient(baseobject):
         except Exception as e:
             ret = parse_except(e)
         return ret
-
+    
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
             # Python internal stuff
             raise AttributeError
         return self.__client
 
+#------------------------------------------extend-----------------------------------------------
 def main():
     pass
 if __name__ == "__main__":

@@ -197,21 +197,21 @@ class erc1155slot():
     def quality_id(self, name):
         return self.__convert_to_hex(self._contract.functions.qualityId(name).call())
 
-    def nftType_count(self):
+    def nfttype_count(self):
         return self._contract.functions.nftTypeCount().call()
 
     def nfttype_name(self, id):
         id = self.__convert_to_int(id)
         return self._contract.functions.nftTypeName(id).call()
 
-    def nftType_id(self, name):
+    def nfttype_id(self, name):
         return self.__convert_to_hex(self._contract.functions.nftTypeId(name).call())
 
-    def is_Blind_Box(self, nfttype):
+    def is_blind_box(self, nfttype): #nfttype is id
         nfttype = self.__convert_to_int(nfttype)
         return self._contract.functions.isBlindBox(nfttype).call()
 
-    def is_exchange(self, nfttype):
+    def is_exchange(self, nfttype): #nfttype  is id
         nfttype = self.__convert_to_int(nfttype)
         return self._contract.functions.isExchange(nfttype).call()
 
@@ -222,9 +222,13 @@ class erc1155slot():
         return self._contract.functions.mintType(to, brand, btype, data)
 
     def raw_mint_quality(to, brand, btype, quality, nfttype, data):
+        data = b'' if not data else data
         return self._contract.functions.to, brand, btype, quality, nfttype, data)
 
     def raw_mint_sub_token(to, qualityid, amount, data):
+        qualityid = self.__convert_to_int(qualityid)
+        amount  = self.__convert_to_int(amount)
+        data = b'' if not data else data
         return self._contract.functions.mintSubToken(to, qualityid, amount, data)
 
     def raw_exchange_blind_box(self, to, id, data = None):
@@ -232,10 +236,10 @@ class erc1155slot():
         data = b'' if not data else data
         return self._contract.functions.exchangeBlindBox(Web3.toChecksumAddress(to), id, data)
 
-    def raw_append_blind_box_id(self, nfttype):
+    def raw_append_blind_box_id(self, nfttype): #nfttype = name
         return self._contract.functions.appendBlindBoxId(nfttype)
     
-    def raw_cancel_blind_box_id(self, nfttype):
+    def raw_cancel_blind_box_id(self, nfttype): # nfttype is name
         return self._contract.functions.cancelBlindBoxId(nfttype)
 
 #*************************************internal********************************************#
