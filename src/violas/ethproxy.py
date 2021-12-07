@@ -290,6 +290,10 @@ class ethproxy():
             level_code      = ifs.quality
             )
 
+
+
+
+
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
             # Python internal stuff
