@@ -337,10 +337,10 @@ class ethproxy():
     def nfttype_id(self, token_id, name):
         return self._slot_cli(token_id).nfttype_id(name)
 
-    def is_blind_box(self, token_id, nfttype):
+    def is_blind_box(self, token_id, nfttype: int):
         return self._slot_cli(token_id).is_blind_box(nfttype)
 
-    def is_exchange(self, token_id, nfttype):
+    def is_exchange(self, token_id, nfttype : int):
         return self._slot_cli(token_id).is_exchange(nfttype)
 
     def mint_brand(self, account, token_id, to_address, brand, data = None, timeout = 180):
@@ -385,8 +385,8 @@ class ethproxy():
                 timeout = timeout) 
 
 
-    def append_blind_box_id(self, account, token_id, to_address, nfttype, timeout = 180):
-        calldata = self._slot_cli(token_id).raw_append_blind_box_id(to_address, nfttype)
+    def append_blind_box_id(self, account, token_id, nfttype, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_append_blind_box_id(nfttype)
         return self.send_contract_transaction(account.address, 
                 account.key, 
                 calldata, 

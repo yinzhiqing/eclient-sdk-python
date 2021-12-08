@@ -313,9 +313,114 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def token_exists(self, token_id, id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.token_exists(token_id, id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def brand_count(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.brand_count(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def brand_name(self, token_id, id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.brand_name(token_id, id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def brand_id(self, token_id, name):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.brand_id(token_id, name))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def type_count(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.type_count(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def type_name(self, token_id, id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.type_name(token_id, id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def type_id(self, token_id, name):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.type_id(token_id, name))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def quality_count(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.quality_count(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def quality_name(self, token_id, id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.quality_name(token_id, id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def quality_id(self, token_id, name):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.quality_id(token_id, name))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def nfttype_count(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.nfttype_count(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def nfttype_name(self, token_id, id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.nfttype_name(token_id, id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def nfttype_id(self, token_id, name):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.nfttype_id(token_id, name))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def get_token_ids_count(self, token_id):
         try:
             ret = result(error.SUCCEED, datas = self.__client.get_token_ids_count(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def is_blind_box(self, token_id, nfttype : int):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.is_blind_box(token_id, nfttype))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def is_exchange(self, token_id, nfttype : int):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.is_exchange(token_id, nfttype))
         except Exception as e:
             ret = parse_except(e)
         return ret
@@ -327,9 +432,9 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
-    def get_token_ids(self, token_id, start = 0, limit = sys.maxsize):
+    def get_token_ids(self, token_id, start = 0, limit = 10):
         try:
-            ret = result(error.SUCCEED, datas = self.__client.get_token_ids(token_id, start, limit))
+            ret = result(error.SUCCEED, datas = self.__client.get_token_ids(token_id, int(start), int(limit)))
         except Exception as e:
             ret = parse_except(e)
         return ret
@@ -380,6 +485,60 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
     
+    def mint_brand(self, account, token_id, to, brand, data = None):
+        try:
+            datas = self.__client.mint_brand(account, token_id, to, brand, data = data)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def mint_type(self, account, token_id, to, brand, btype, data = None):
+        try:
+            datas = self.__client.mint_type(account, token_id, to, brand, btyte, data = data)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def mint_quality(self, account, token_id, to, brand, btype, quality, nfttype = "", data = None, timeout = 180):
+        try:
+            datas = self.__client.mint_quality(account, token_id, to, brand, btyte, quality, nfttype, data = data)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def mint_sub_token(self, account, token_id, to, quality_id, amount, data = None, timeout = 180):
+        try:
+            datas = self.__client.mint_sub_token(account, token_id, to, quality_id, amount, data = data)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def append_blind_box_id(self, account, token_id, nfttype, timeout = 180):
+        try:
+            datas = self.__client.append_blind_box_id(account, token_id, nfttype)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def cancel_blind_box_id(self, account, token_id, nfttype, timeout = 180):
+        try:
+            datas = self.__client.cancel_blind_box_id(account, token_id, nfttype)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
             # Python internal stuff

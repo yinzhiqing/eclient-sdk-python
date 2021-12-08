@@ -28,6 +28,7 @@ class idfields():
                 )
 
     def __parse(self, id):
+        print(id)
         id = self.__convert_to_hex(id)
         setattr(self, "id", id)
         setattr(self, "mark", id[0:16])
@@ -216,14 +217,17 @@ class erc1155slot():
         return self._contract.functions.isExchange(nfttype).call()
 
     def raw_mint_brand(self, to, brand, data):
+        data = b'' if not data else data
         return self._contract.functions.mintBrand(to, brand, data)
 
-    def raw_mint_type(self. to, brand, btype, data):
+    def raw_mint_type(self, to, brand, btype, data):
+        data = b'' if not data else data
         return self._contract.functions.mintType(to, brand, btype, data)
 
     def raw_mint_quality(to, brand, btype, quality, nfttype, data):
         data = b'' if not data else data
-        return self._contract.functions.to, brand, btype, quality, nfttype, data)
+        data = b'' if not data else data
+        return self._contract.functions.mint_quality(to, brand, btype, quality, nfttype, data)
 
     def raw_mint_sub_token(to, qualityid, amount, data):
         qualityid = self.__convert_to_int(qualityid)
