@@ -496,7 +496,7 @@ class ethclient(baseobject):
 
     def mint_type(self, account, token_id, to, brand, btype, data = None):
         try:
-            datas = self.__client.mint_type(account, token_id, to, brand, btyte, data = data)
+            datas = self.__client.mint_type(account, token_id, to, brand, btype, data = data)
             ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
             self._logger.debug(f"result: {ret.datas}")
         except Exception as e:
@@ -505,7 +505,7 @@ class ethclient(baseobject):
 
     def mint_quality(self, account, token_id, to, brand, btype, quality, nfttype = "", data = None, timeout = 180):
         try:
-            datas = self.__client.mint_quality(account, token_id, to, brand, btyte, quality, nfttype, data = data)
+            datas = self.__client.mint_quality(account, token_id, to, brand, btype, quality, nfttype, data = data)
             ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
             self._logger.debug(f"result: {ret.datas}")
         except Exception as e:

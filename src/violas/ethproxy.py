@@ -167,7 +167,6 @@ class ethproxy():
         if not nonce:
             nonce = self._w3.eth.getTransactionCount(Web3.toChecksumAddress(sender))
 
-        print(sender)
         if not gas:
             if calldata:
                 gas = calldata.estimateGas({"from":sender})
@@ -361,7 +360,7 @@ class ethproxy():
 
 
     def mint_quality(self, account, token_id, to_address, brand, btype, quality, nfttype, data = None, timeout = 180):
-        calldata = self._slot_cli(token_id).raw_mint_quality(to_address, brand, btype, quality, data)
+        calldata = self._slot_cli(token_id).raw_mint_quality(to_address, brand, btype, quality, nfttype, data)
         return self.send_contract_transaction(account.address, 
                 account.key, 
                 calldata, 

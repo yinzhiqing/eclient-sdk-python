@@ -218,22 +218,22 @@ class erc1155slot():
 
     def raw_mint_brand(self, to, brand, data):
         data = b'' if not data else data
-        return self._contract.functions.mintBrand(to, brand, data)
+        return self._contract.functions.mintBrand(Web3.toChecksumAddress(to), brand, data)
 
     def raw_mint_type(self, to, brand, btype, data):
         data = b'' if not data else data
-        return self._contract.functions.mintType(to, brand, btype, data)
+        return self._contract.functions.mintType(Web3.toChecksumAddress(to), brand, btype, data)
 
-    def raw_mint_quality(to, brand, btype, quality, nfttype, data):
+    def raw_mint_quality(self, to, brand, btype, quality, nfttype, data):
         data = b'' if not data else data
-        data = b'' if not data else data
-        return self._contract.functions.mint_quality(to, brand, btype, quality, nfttype, data)
+        return self._contract.functions.mintQuality(Web3.toChecksumAddress(to), brand, btype, quality, nfttype, data)
 
-    def raw_mint_sub_token(to, qualityid, amount, data):
+    def raw_mint_sub_token(self, to, qualityid, amount, data):
         qualityid = self.__convert_to_int(qualityid)
         amount  = self.__convert_to_int(amount)
         data = b'' if not data else data
-        return self._contract.functions.mintSubToken(to, qualityid, amount, data)
+        print(qualityid)
+        return self._contract.functions.mintSubToken(Web3.toChecksumAddress(to), qualityid, amount, data)
 
     def raw_exchange_blind_box(self, to, id, data = None):
         id      = self.__convert_to_int(id)
