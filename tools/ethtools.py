@@ -294,7 +294,8 @@ def get_token_id_uri():
 def get_token_ids(start = 0, limit = 10):
     logger.debug("start get_token_ids({}, {}, {})".format(start, limit, token_id))
     ret = client.get_token_ids(token_id, start = start, limit = limit)
-    logger.debug("totle ids: {0}".format(ret.datas))
+    logger.debug("totle ids: ".format(ret.datas))
+    json_print(ret.datas)
 
 def get_token_fields(id):
     logger.debug("start get_token_fields({})".format(token_id))
