@@ -103,9 +103,9 @@ def init_args(pargs):
     pargs.append(mint_nft, "mint id of token_id.")
     pargs.append(get_token_fields, "show id field info of token_id.")
     
-    pargs.appends(globals(), 
-            no_includes = [run, 
-                init_args])
+    #pargs.appends(globals(), 
+    #        no_includes = [run, 
+    #            init_args])
 
 '''
 *************************************************ethwallet oper*******************************************************

@@ -60,6 +60,7 @@ class lbethwallet:
 
     @classmethod
     def new(cls):
+        web3.Account.enable_unaudited_hdwallet_features();
         account, mnemonic = web3.Account.create_with_mnemonic()
         return cls(mnemonic)
 

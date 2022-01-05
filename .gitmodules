@@ -1,3 +1,6 @@
 [submodule "depends/lbparseargs"]
 	path = depends/lbparseargs
 	url = https://github.com/palliums-developers/parseargs
+[submodule "depends/parseargs"]
+	path = depends/parseargs
+	url = https://github.com/yinzhiqing/parseargs.git

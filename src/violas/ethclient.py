@@ -59,8 +59,9 @@ class ethwallet(baseobject):
                 ret = result(error.SUCCEED, "", "")
             else:
                 ret = result(error.SUCCEED, "not found wallet file", "")
-                raise Exception(f"not found {self.name()} wallet file({wallet})")
+                #raise Exception(f"not found {self.name()} wallet file({wallet})")
                 self.__wallet = walletproxy.new()
+                self.save()
 
         except Exception as e:
             ret = parse_except(e)

@@ -4,7 +4,7 @@ import json
 sys.path.append("..")
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../depends/"))
 
-from lbparseargs import (
+from parseargs import (
         parseargs as parseargsbase
         )
 #module name
