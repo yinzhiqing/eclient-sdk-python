@@ -68,7 +68,11 @@ def run(argc, argv, exit = True):
                 pargs.exit_error_opt(opt)
 
             global eth_wallet
+            global ewclient
+            global wallet
+            ewclient = None
             eth_wallet = arg
+            wallet = get_ethwallet();
         elif pargs.has_callback(opt):
             pargs.callback(opt, *arg_list)
         else:
@@ -84,6 +88,7 @@ def init_args(pargs):
     pargs.append("wallet", "inpurt wallet file or mnemonic", True, "file name/mnemonic", priority = 13, argtype = parseargs.argtype.STR)
 
     #wallet 
+    pargs.append(new_wallet, "new wallet.")
     pargs.append(new_account, "new account and save to local wallet.")
     pargs.append(get_account, "show account info.")
     pargs.append(has_account, "has target account in wallet.")
@@ -110,6 +115,10 @@ def init_args(pargs):
 '''
 *************************************************ethwallet oper*******************************************************
 '''
+
+def new_wallet(wallet_name):
+    ewclient = ethwallet(name, wallet_name, chain)
+
 def new_account():
     ret = wallet.new_account()
     wallet.dump_wallet()
