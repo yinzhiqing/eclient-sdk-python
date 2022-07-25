@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 import log.logger
 import traceback
 import datetime
-import sqlalchemy
+#import sqlalchemy
 import requests
 import comm
 import comm.error

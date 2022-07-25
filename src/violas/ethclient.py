@@ -20,7 +20,7 @@ from .ethproxy import (
         )
 from enum import Enum
 from baseobject import baseobject
-import redis
+#import redis
 
 import web3
 from web3 import Web3
