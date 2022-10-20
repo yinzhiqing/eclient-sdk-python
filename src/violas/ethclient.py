@@ -314,9 +314,19 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def index_start(self, token_id):
+        return self.__client.index_start(token_id)
+
     def token_exists(self, token_id, id):
         try:
             ret = result(error.SUCCEED, datas = self.__client.token_exists(token_id, id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def token_id(self, token, index):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.token_id(token, index))
         except Exception as e:
             ret = parse_except(e)
         return ret
@@ -349,6 +359,13 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def get_type_ids(self, token_id, start = 0, limit = 10):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.get_type_ids(token_id, int(start), int(limit)))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def type_name(self, token_id, id):
         try:
             ret = result(error.SUCCEED, datas = self.__client.type_name(token_id, id))
@@ -356,9 +373,16 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
-    def type_id(self, token_id, name):
+    def type_id(self, token_id, key):
         try:
-            ret = result(error.SUCCEED, datas = self.__client.type_id(token_id, name))
+            ret = result(error.SUCCEED, datas = self.__client.type_id(token_id, key))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def type_datas(self, token_id, key):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.type_datas(token_id, key))
         except Exception as e:
             ret = parse_except(e)
         return ret
@@ -447,9 +471,9 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
-    def mint(self, account, token_id, to, id, amount, data = None):
+    def mint(self, account, token_id, to, id, amount, data = None, *args, **kwargs):
         try:
-            datas = self.__client.mint(account, token_id, to, id = id, amount = amount, data = data)
+            datas = self.__client.mint(account, token_id, to, id, amount, data, *args, **kwargs)
             ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
             self._logger.debug(f"result: {ret.datas}")
         except Exception as e:
@@ -534,6 +558,15 @@ class ethclient(baseobject):
     def cancel_blind_box_id(self, account, token_id, nfttype, timeout = 180):
         try:
             datas = self.__client.cancel_blind_box_id(account, token_id, nfttype)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def sha3_id(self, token_id, data):
+        try:
+            datas = self.__client.sha3_id(token_id, data)
             ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
             self._logger.debug(f"result: {ret.datas}")
         except Exception as e:

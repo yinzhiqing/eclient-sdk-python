@@ -7,6 +7,8 @@ sys.path.append(f"..")
 import web3
 from web3 import Web3
 
+token_type = "erc20"
+
 class erc20slot():
     def __init__(self, contract, name = "erc20"):
         self._contract = contract

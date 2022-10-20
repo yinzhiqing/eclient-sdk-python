@@ -19,15 +19,24 @@ from comm.result import result, parse_except
 from comm.error import error
 from enum import Enum
 from comm.functions import json_print
-from erc20slot import erc20slot 
+from erc20slot import (
+        erc20slot,
+        token_type as ERC20_NAME,
+        )
 from erc1155slot import (
         erc1155slot,
-        idfields,
+        idfields as fields1155,
+        token_type as ERC1155_NAME,
+        )
+from erc721slot import (
+        erc721slot,
+        idfields as fields721,
+        token_type as ERC721_NAME,
         )
 from lbethwallet import lbethwallet
 from metafiles import (
         erc1155_abi as erc1155_std_abi,
-        #erc721_abi as erc721_std_abi,
+        erc721_abi as erc721_std_abi,
         #erc20_abi as erc20_std_abi,
         )
 
@@ -37,13 +46,11 @@ from web3 import Web3
 #module name
 name="ethproxy"
 
-ERC20_NAME      = "erc20"
-ERC1155_NAME    = "erc1155"
-ERC721_NAME     = "erc721"
+logger = log.logger.getLogger(name) 
 
 contract_codes = {
         #ERC20_NAME      : {"abi":erc20_std_abi.ABI, "bytecode":erc20_std_abi.BYTECODE, "token_type": "erc20", "address": erc20_std_abi.ADDRESS},
-        #ERC721_NAME      : {"abi":erc721_std_abi.ABI, "bytecode":erc721_std_abi.BYTECODE, "token_type": "erc721", "address": erc721_std_abi.ADDRESS},
+        ERC721_NAME      : {"abi":erc721_std_abi.ABI, "bytecode":erc721_std_abi.BYTECODE, "token_type": "erc721", "address": erc721_std_abi.ADDRESS},
         ERC1155_NAME    : {"abi":erc1155_std_abi.ABI, "bytecode":erc1155_std_abi.BYTECODE, "token_type": "erc1155", "address": erc1155_std_abi.ADDRESS},
         }
 
@@ -122,6 +129,9 @@ class ethproxy():
         elif tokentype == ERC1155_NAME:
             erc_token = erc1155slot(self._w3.eth.contract(Web3.toChecksumAddress(address), abi=contract["abi"]))
             self.tokens_decimals[token_id] = 0
+        elif tokentype == ERC721_NAME:
+            erc_token = erc721slot(self._w3.eth.contract(Web3.toChecksumAddress(address), abi=contract["abi"]))
+            self.tokens_decimals[token_id] = 0
         else:
             raise Exception("{} is invalied.".format(tokentype))
 
@@ -144,10 +154,10 @@ class ethproxy():
         return self.tokens_decimals[token]
 
     def allowance(self, owner, spender, token_id, **kwargs):
-        return self.tokens[token_id].allowance(owner, spender)
+        return self._slot_cli(token_id).allowance(owner, spender)
 
     def approve(self, account, spender, amount, token_id, timeout = 180, **kwargs):
-        calldata = self.tokens[token_id].raw_approve(spender, amount)
+        calldata = self._slot_cli(token_id).raw_approve(spender, amount)
         return self.send_contract_transaction(account.address, account.key, calldata, timeout = timeout) 
 
     def send_token(self, account, to_address, amount, token_id, nonce = None, timeout = 180, id = None):
@@ -155,10 +165,12 @@ class ethproxy():
             return self.send_eth_transaction(account.address, account.key, to_address, amount, nonce = nonce, timeout = timeout) 
         else:
             calldata = None
-            if self.tokens[token_id].slot_name() == ERC20_NAME:
-                calldata = self.tokens[token_id].raw_transfer(to_address, amount)
-            elif self.tokens[token_id].slot_name() == ERC1155_NAME:
-                calldata = self.tokens[token_id].raw_transfer_from(account.address, to_address, id, amount)
+            if self._slot_cli(token_id).slot_name() == ERC20_NAME:
+                calldata = self._slot_cli(token_id).raw_transfer(to_address, amount)
+            elif self._slot_cli(token_id).slot_name() == ERC1155_NAME:
+                calldata = self._slot_cli(token_id).raw_transfer_from(account.address, to_address, id, amount)
+            elif self._slot_cli(token_id).slot_name() == ERC721_NAME:
+                calldata = self._slot_cli(token_id).raw_transfer_from(account.address, to_address, id, 1)
             else:
                 raise Exception("token_id[{}] is not [{}]".format(token_id, self.tokens_id))
 
@@ -222,7 +234,7 @@ class ethproxy():
     def get_balance(self, address, token_id, *args, **kwargs):
         if token_id == "eth":
             return self._w3.eth.getBalance(address)
-        return self.tokens[token_id].balance_of(address, **kwargs)
+        return self._slot_cli(token_id).balance_of(address, **kwargs)
 
     def get_balances(self, address, *args, **kwargs):
         balances = {}
@@ -240,35 +252,41 @@ class ethproxy():
         return self._w3.eth.chainId
 
     def uri(self, token_id):
-        return self.tokens[token_id].uri()
+        return self._slot_cli(token_id).uri()
+
+    def index_start(self, token_id, **kwargs):
+        return self._slot_cli(token_id).index_start(token_id)
 
     def _slot_cli(self, token_id):
-        if self.tokens[token_id].slot_name() == ERC1155_NAME:
+        if self.tokens[token_id].slot_name() in (ERC1155_NAME, ERC721_NAME):
             return self.tokens[token_id]
         else:
             raise Exception("contract is not support. token_id = {} slot_name = {}".format(token_id, self.tokens[token_id].slot_name()))
 
 
-    def mint(self, account, token_id, to_address, id, amount, data = None, timeout = 180):
+    #erc1155: data
+    #erc721: tid
+    def mint(self, account, token_id, to_address, id, amount = 1, data = None, timeout = 180, *args, **kwargs):
         calldata = None
-        if self.tokens[token_id].slot_name() == ERC1155_NAME:
-            calldata = self.tokens[token_id].raw_mint(to_address, id, amount)
+        if self._slot_cli(token_id).slot_name() in (ERC1155_NAME, ERC721_NAME):
+            calldata = self._slot_cli(token_id).raw_mint(to_address, id, amount, *args, **kwargs)
         else:
-            raise Exception("contract is not support mint. token_id = {} slot_name = {}".format(token_id, self.tokens[token_id].slot_name()))
+            raise Exception("contract is not support mint. token_id = {} slot_name = {}".format(token_id, self._slot_cli(token_id).slot_name()))
 
         return self.send_contract_transaction(account.address, account.key, calldata, nonce = None, timeout = timeout) 
 
     def pause(self, token_id):
-        return self.tokens[token_id].pause()
+        return self._slot_cli(token_id).pause()
 
     def unpause(self, token_id):
-        return self.tokens[token_id].unpause()
+        return self._slot_cli(token_id).unpause()
 
     def get_token_ids_count(self, token_id):
-        return self.tokens[token_id].tokenCount()
+        logger.debug("tokenid: " + token_id)
+        return self._slot_cli(token_id).tokenCount()
 
     def get_token_id_total_amount(self, token_id, id):
-        return self.tokens[token_id].tokenTotalAmount(id)
+        return self._slot_cli(token_id).tokenTotalAmount(id)
 
     def get_token_ids(self, token_id, start = 0, limit = sys.maxsize):
         ids = []
@@ -278,7 +296,7 @@ class ethproxy():
                 break
 
             if i >= start:
-                id  = self.tokens[token_id].token_id(i)
+                id  = self._slot_cli(token_id).token_id(i)
                 fields = self.get_token_fields(token_id, id)
                 fields.update({"index": i, "id": id})
                 ids.append(fields)
@@ -286,23 +304,35 @@ class ethproxy():
         return ids
 
     def get_token_fields(self, token_id, id):
-        ifs = idfields(id)
-        return dict(
-            brand   = self.tokens[token_id].brand_name(ifs.brand),
-            btype   = self.tokens[token_id].type_name(ifs.btype),
-            quality = self.tokens[token_id].quality_name(ifs.quality),
-            token_type = self.tokens[token_id].nfttype_name(ifs.nfttype),
-            issubtoken      = ifs.issubtoken,
-            quality_index   = ifs.quality_index,
-            parent_token    = ifs.parent_token,
-            brand_code      = ifs.brand,
-            type_code       = ifs.btype,
-            level_code      = ifs.quality
-            )
+        if self._slot_cli(token_id).slot_name() == ERC1155_NAME:
+            ifs = fields1155(id)
+            return dict(
+                brand   = self._slot_cli(token_id).brand_name(ifs.brand),
+                btype   = self._slot_cli(token_id).type_name(ifs.btype),
+                quality = self._slot_cli(token_id).quality_name(ifs.quality),
+                token_type = self._slot_cli(token_id).nfttype_name(ifs.nfttype),
+                issubtoken      = ifs.issubtoken,
+                quality_index   = ifs.quality_index,
+                parent_token    = ifs.parent_token,
+                brand_code      = ifs.brand,
+                type_code       = ifs.btype,
+                level_code      = ifs.quality
+                )
+        elif self._slot_cli(token_id).slot_name() == ERC721_NAME:
+            ifs = fields721(id)
+            return dict()
+        else:
+            return dict()
 
 
     def token_exists(self, token_id, id):
         return self._slot_cli(token_id).token_exists(id)
+
+    def token_id(self, token, index): 
+        return self._slot_cli(token).token_id(index)
+
+    def token_type(self, token_id):
+        return self._slot_cli(token_id).token_type(id)
 
     def brand_count(self, token_id):
         return self._slot_cli(token_id).brand_count()
@@ -316,11 +346,34 @@ class ethproxy():
     def type_count(self, token_id):
         return self._slot_cli(token_id).type_count()
 
+    def get_type_ids(self, token_id, start = 0, limit = sys.maxsize):
+        ids = []
+        count = self.type_count(token_id)
+        for i in range(count):
+            if i >= start + limit:
+                break
+
+            if i >= start:
+                id  = self._slot_cli(token_id).type_id(i)
+                datas= self._slot_cli(token_id).type_datas(id)
+                fields = self.get_token_fields(token_id, id)
+                fields.update({
+                    "index": i, 
+                    "id": id, 
+                    "datas": datas,
+                    })
+                ids.append(fields)
+
+        return ids
+
     def type_name(self, token_id, id):
         return self._slot_cli(token_id).type_name(id)
 
-    def type_id(self, token_id, name):
-        return self._slot_cli(token_id).type_id(name)
+    def type_id(self, token_id, key):
+        return self._slot_cli(token_id).type_id(key)
+        
+    def type_datas(self, token_id, tid):
+        return self._slot_cli(token_id).type_datas(tid)
         
     def quality_count(self, token_id):
         return self._slot_cli(token_id).quality_count()
@@ -354,6 +407,7 @@ class ethproxy():
                 nonce = None, 
                 timeout = timeout) 
 
+    #1155
     def mint_type(self, account, token_id, to_address, brand, btype, data = None, timeout = 180):
         calldata = self._slot_cli(token_id).raw_mint_type(to_address, brand, btype, data)
         return self.send_contract_transaction(account.address, 
@@ -362,6 +416,14 @@ class ethproxy():
                 nonce = None, 
                 timeout = timeout) 
 
+    #721
+    def mint_type(self, account, token_id, id, capacity, data = None, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_mint_type(id, capacity, data)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
 
     def mint_quality(self, account, token_id, to_address, brand, btype, quality, nfttype, data = None, timeout = 180):
         calldata = self._slot_cli(token_id).raw_mint_quality(to_address, brand, btype, quality, nfttype, data)
@@ -403,6 +465,9 @@ class ethproxy():
                 calldata, 
                 nonce = None, 
                 timeout = timeout) 
+
+    def sha3_id(self, token_id, data):
+        return self._slot_cli(token_id).sha3_id(data)
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):

@@ -28,7 +28,7 @@
 	},
 	"nft721": {
 		"name": "ViolasNft721",
-		"address": "0xcec77283Db3F65A21181d4942216Dd9006F3dccd",
+		"address": "0x9EFc7ce3a340dEaaB9e7534628AAf02F38804074",
 		"deploy": false,
 		"upgrade": false,
 		"params": []

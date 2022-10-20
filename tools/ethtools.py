@@ -7,6 +7,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
 
 import traceback
 import datetime
+import web3
+from web3 import Web3
 from enum import Enum
 
 from src.violas import *
@@ -15,6 +17,9 @@ name="ethtools"
 chain = "ethereum"
 
 TOKEN_DEF_1155 = "erc1155"
+TOKEN_DEF_721 = "erc721"
+
+token_id = TOKEN_DEF_1155
 #load logging
 logger = log.logger.getLogger(name) 
 
@@ -27,6 +32,7 @@ def setup():
     client = get_ethclient()
 
 def run(argc, argv, exit = True):
+    global token_id 
     try:
         logger.debug("start eth.main")
         pargs = parseargs(exit = exit)
@@ -63,6 +69,9 @@ def run(argc, argv, exit = True):
         if pargs.is_matched(opt, ["help"]):
             pargs.show_args()
             return
+        elif pargs.is_matched(opt, ["tokenid"]):
+            logger.debug("..................")
+            token_id = arg
         elif pargs.is_matched(opt, ["wallet"]):
             if not arg:
                 pargs.exit_error_opt(opt)
@@ -74,6 +83,7 @@ def run(argc, argv, exit = True):
             eth_wallet = arg
             wallet = get_ethwallet();
         elif pargs.has_callback(opt):
+            setup()
             pargs.callback(opt, *arg_list)
         else:
             raise Exception(f"not found matched opt{opt}")
@@ -86,27 +96,32 @@ def init_args(pargs):
     pargs.clear()
     pargs.append("help", "show arg list.")
     pargs.append("wallet", "inpurt wallet file or mnemonic", True, "file name/mnemonic", priority = 13, argtype = parseargs.argtype.STR)
+    pargs.append("tokenid", "set tokenid(erc1155 erc721. default: erc1155)", True, "erc type", priority = 13, argtype = parseargs.argtype.STR)
 
     #wallet 
     pargs.append(new_wallet, "new wallet.")
     pargs.append(new_account, "new account and save to local wallet.")
-    pargs.append(get_account, "show account info.")
+    pargs.append(account, "show account info.")
     pargs.append(has_account, "has target account in wallet.")
-    pargs.append(show_accounts, "show all counts address list(local wallet).")
-    pargs.append(show_accounts_full, "show all counts address list(local wallet) with privkey.")
+    pargs.append(accounts, "show all counts address list(local wallet).")
+    pargs.append(accounts_full, "show all counts address list(local wallet) with privkey.")
 
     #client
     pargs.append(send_coin_erc20, "send token(erc20 coin) to target address")
     pargs.append(send_coin_erc1155, "send token(erc1155 coin) to target address")
     pargs.append(approve, "approve to_address use coin amount from from_address")
     pargs.append(allowance, "request to_address can use coin amount from from_address")
-    pargs.append(get_balance, "get address's token(module) amount.")
-    pargs.append(get_balances, "get address's tokens.")
-    pargs.append(get_rawtransaction, "get transaction from eth nodes.")
-    pargs.append(get_syncing_state, "get chain syncing state.",)
-    #pargs.append(show_token_list, "show token list.")
-    pargs.append(mint_nft, "mint id of token_id.")
-    pargs.append(get_token_fields, "show id field info of token_id.")
+    pargs.append(balance, "get address's token(module) amount.")
+    pargs.append(balances, "get address's tokens.")
+    pargs.append(rawtransaction, "get transaction from eth nodes.")
+    pargs.append(syncing_state, "get chain syncing state.",)
+    pargs.append(mint, "mint id of token_id.")
+    pargs.append(token_fields, "show id field info of token_id.")
+    pargs.append(token_ids_count, "show count of token.")
+    pargs.append(token_ids, "show part of tokens.")
+    pargs.append(type_count, "show count of type.")
+    pargs.append(type_list, "show type list.")
+    pargs.append(token_list, "show all token.")
     
     #pargs.appends(globals(), 
     #        no_includes = [run, 
@@ -125,7 +140,7 @@ def new_account():
     assert ret.state == error.SUCCEED, "new_account failed"
     logger.debug("account address : {}".format(ret.datas.address))
 
-def show_accounts():
+def accounts():
     i = 0
     account_count = wallet.get_account_count()
     print(f"account count: {account_count}")
@@ -137,7 +152,7 @@ def show_accounts():
         logger.debug(f"{i}: {account.address}")
         i += 1
 
-def show_accounts_full():
+def accounts_full():
     i = 0
     account_count = wallet.get_account_count()
     while True and i < account_count:
@@ -148,7 +163,7 @@ def show_accounts_full():
         logger.debug(f"({i:03}): address: {account.address} privkey: {account.key.hex()}")
         i += 1
 
-def get_account(address):
+def account(address):
     print(client.get_account_state(address).datas)
 
 def has_account(address):
@@ -160,8 +175,8 @@ def has_account(address):
 
 client = None
 eth_nodes   = [dict(
-    host  = "https://kovan.infura.io/v3/e1ac6790237a4044bff3b676bae7e257",
-    name  = "ethereum 1",
+    host  = "http://124.251.110.238/rpc",
+    name  = "violins",
     )]
 eth_wallet  = "ewallet"
 eth_tokens = dict(
@@ -171,10 +186,8 @@ def get_ethclient():
     global client
     if client:
         return client
-
-    print(eth_nodes)
     client = ethclient(name, eth_nodes, chain)
-    client.load_contract(TOKEN_DEF_1155)
+    client.load_contract(token_id, tokentype=token_id)
     return client
     
 ewclient = None
@@ -188,17 +201,6 @@ def get_ethwallet():
 def get_ethproof(dtype = "v2b"):
 
     return requestclient(name, "")
-
-def show_token_list():
-    logger.debug(f"start show_token_name()")
-    ret = client.get_token_list()
-    assert ret.state == error.SUCCEED, "get tokens failed."
-    json_print(ret.datas)
-
-def mint_coin(address, amount, token_id = TOKEN_DEF_1155):
-    logger.debug("start mint_coin({address}, {amount}, {token_id}, {module})")
-    print(client.get_balance(address, token_id).datas)
-
 
 def send_coin_erc20(from_address, to_address, amount, token_id):
     ret = wallet.get_account(from_address)
@@ -220,7 +222,7 @@ def send_coin_erc1155(from_address, to_address, amount, token_id, id):
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
 
-def mint_nft(manager, to_address, id, amount, token_id = TOKEN_DEF_1155,  data = None):
+def mint(manager, to_address, id, amount, data = None):
     ret = wallet.get_account(manager)
     if ret.state != error.SUCCEED:
         raise Exception("get account failed")
@@ -230,7 +232,17 @@ def mint_nft(manager, to_address, id, amount, token_id = TOKEN_DEF_1155,  data =
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
 
-def exchange_blind_box(manager, to_address, id, token_id = TOKEN_DEF_1155,  data = None):
+def mint_721(manager, to_address, id):
+    ret = wallet.get_account(manager)
+    if ret.state != error.SUCCEED:
+        raise Exception("get account failed")
+    account = ret.datas
+
+    ret = client.mint(account, token_id, to_address, id, amount, data, tid = tid)
+    assert ret.state == error.SUCCEED, ret.message
+    print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
+
+def exchange_blind_box(manager, to_address, id, data = None):
     ret = wallet.get_account(manager)
     if ret.state != error.SUCCEED:
         raise Exception("get account failed")
@@ -255,24 +267,24 @@ def allowance(from_address, to_address, token_id):
     assert ret.state == error.SUCCEED, ret.message
     print(f"allowance balance :{ret.datas}")
 
-def get_balance(address, token_id, id = None):
-    logger.debug(f"start get_balance address= {address} token_id= {token_id}, id = {id}")
+def balance(address, token_id, id = None):
+    logger.debug(f"start balance address= {address} token_id= {token_id}, id = {id}")
     ret = client.get_balance(address, token_id, id = id)
     logger.debug("balance: {0}".format(ret.datas))
 
-def get_decimals(token_id):
-    logger.debug(f"start get_decimals token_id= {token_id}")
+def decimals(token_id):
+    logger.debug(f"start decimals token_id= {token_id}")
     ret = client.get_decimals(token_id)
     logger.debug(f"decimals: {ret}")
 
-def get_balances(address):
-    logger.debug(f"start get_balances address= {address}")
+def balances(address):
+    logger.debug(f"start balances address= {address}")
     ret = client.get_balances(address)
     logger.debug("balance: {0}".format(ret.datas))
 
 
-def get_rawtransaction(txhash):
-    logger.debug(f"start get_rawtransaction(txhash={txhash}")
+def rawtransaction(txhash):
+    logger.debug(f"start rawtransaction(txhash={txhash}")
 
     ret = client.get_rawtransaction(txhash)
     if ret.state != error.SUCCEED:
@@ -280,61 +292,74 @@ def get_rawtransaction(txhash):
 
     print(ret.datas)
 
-def get_syncing_state():
-    logger.debug(f"start get_syncing_state()")
+def syncing_state():
+    logger.debug(f"start syncing_state()")
     ret = client.get_syncing_state()
     logger.debug("syncing state: {0}".format(ret.datas))
 
-def get_chain_id():
-    logger.debug(f"start get_chain_id()")
+def chain_id():
+    logger.debug(f"start chain_id()")
     ret = client.get_chain_id()
     logger.debug("chain id: {0}".format(ret.datas))
 
-def get_token_id_address():
-    logger.debug("start get_token_id_address({})".format(token_id))
+def token_id_address():
+    logger.debug("start token_id_address({})".format(token_id))
     ret = client.get_token_id_address(token_id)
     logger.debug("address: {0}".format(ret.datas))
 
-def get_token_id_uri():
-    logger.debug("start get_token_id_address({})".format(token_id))
+def token_id_uri():
+    logger.debug("start token_id_address({})".format(token_id))
     ret = client.get_token_id_uri(token_id)
     logger.debug("address: {0}".format(ret.datas))
 
-def get_token_ids(start = 0, limit = 10):
-    logger.debug("start get_token_ids({}, {}, {})".format(start, limit, token_id))
+def token_ids_count():
+    logger.debug("start token_ids_count({})".format(token_id))
+    ret = client.get_token_ids_count(token_id)
+    logger.debug("totle ids count: {0}".format(ret.datas))
+
+def token_ids(start = 0, limit = 10):
+    logger.debug("start token_ids({}, {}, {})".format(start, limit, token_id))
     ret = client.get_token_ids(token_id, start = start, limit = limit)
     logger.debug("totle ids: ".format(ret.datas))
     json_print(ret.datas)
 
-def get_token_fields(id):
-    logger.debug("start get_token_fields({})".format(token_id))
+def token_fields(id):
+    logger.debug("start token_fields({})".format(token_id))
     ret = client.get_token_fields(token_id,id)
     logger.debug("address: {0}".format(ret.datas))
 
-def get_token_ids_count():
-    logger.debug("start get_token_ids_count({})".format(token_id))
-    ret = client.get_token_ids_count(token_id)
-    logger.debug("totle ids count: {0}".format(ret.datas))
-
-def get_token_id_total_amount(id):
-    logger.debug("start get_token_id_total_amount({}, {})".format(token_id, id))
+def token_id_total_amount(id):
+    logger.debug("start token_id_total_amount({}, {})".format(token_id, id))
     ret = client.get_token_id_total_amount(token_id, id)
     logger.debug("totle amount: {0}".format(ret.datas))
+
+def type_count():
+    logger.debug("start type_count({})".format(token_id))
+    ret = client.type_count(token_id)
+    logger.debug("type_count: {0}".format(ret.datas))
 
 def __assert_result(ret, msg = ""):
     assert ret.state == error.SUCCEED, "{}:{}".format(msg, ret.message)
 
-token_id = TOKEN_DEF_1155
-def __show_filed_list(call_count, call_name):
+def __show_filed_list(call_count, call_name, fixed_start = True, fixed_value = 0):
     ret = call_count(token_id)
     __assert_result(ret)
 
     logger.debug("count: {}".format(ret.datas))
     logger.debug("-" * 20)
+
+    start = fixed_value
+    if not fixed_start:
+        start = client.index_start(token_id) 
+
+    logger.debug("start: {}".format(start))
     for id in range(ret.datas):
-        ret = call_name(token_id, id + 1)
+        ret = call_name(token_id, id + start)
         __assert_result(ret)
-        logger.debug("id: {}\t |  name: {}".format(id + 1, ret.datas))
+        logger.debug("index: {}\t|\tdata: {}".format(id + start, ret.datas))
+
+def token_list():
+    __show_filed_list(client.get_token_ids_count, client.token_id, -1)
 
 def brand_list():
     __show_filed_list(client.brand_count, client.brand_name)
@@ -414,6 +439,9 @@ def mint_sub_token(manager, to, quality_id, amount, data = None, timeout = 180):
     __assert_result(ret)
     logger.debug(ret.datas)
 
+def test():
+    sid = client.sha3_id(token_id, "0x03").datas
+    logger.debug("sid: {}".format(sid))
 
 
 
@@ -425,5 +453,5 @@ def mint_sub_token(manager, to, quality_id, amount, data = None, timeout = 180):
 
 
 if __name__ == "__main__":
-    setup()
     run(len(sys.argv) - 1, sys.argv[1:])
+    #test()

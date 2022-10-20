@@ -7,6 +7,7 @@ sys.path.append(f"..")
 import web3
 from web3 import Web3
 
+token_type = "erc1155"
 class idfields():
     def __init__(self, id):
         self.__parse(id)
@@ -135,7 +136,7 @@ class erc1155slot():
     def raw_approve(self, spender, value):
         return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), value)
 
-    def raw_mint(self, to, id, amount, data = None):
+    def raw_mint(self, to, id, amount, data = None, *args, **kwargs):
         id      = self.__convert_to_int(id)
         amount  = self.__convert_to_int(amount)
         data = b'' if not data else data
@@ -154,6 +155,9 @@ class erc1155slot():
         return self._contract.functions.burnBatch(account, ids, amounts)
 
 #*************************************extende********************************************
+    def index_start(self, token_id, **kwargs):
+        return 1
+
     def tokenCount(self):
         return self._contract.functions.tokenCount().call()
 
