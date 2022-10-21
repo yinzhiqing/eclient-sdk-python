@@ -417,7 +417,7 @@ class ethproxy():
                 timeout = timeout) 
 
     #721
-    def mint_type(self, account, token_id, id, capacity, data = None, timeout = 180):
+    def append_type(self, account, token_id, id, capacity, data = None, timeout = 180):
         calldata = self._slot_cli(token_id).raw_mint_type(id, capacity, data)
         return self.send_contract_transaction(account.address, 
                 account.key, 
@@ -466,8 +466,15 @@ class ethproxy():
                 nonce = None, 
                 timeout = timeout) 
 
-    def sha3_id(self, token_id, data):
-        return self._slot_cli(token_id).sha3_id(data)
+    def sha3_id(self, num = None, text=None):
+        if text:
+            return Web3.sha3(hexstr=(Web3.toHex(text=text))).hex()
+        if num:
+            return Web3.sha3(hexstr= 
+                Web3.toHex(hexstr= (
+                     Web3.toHex(hexstr=num)[2:]).zfill(64))
+                ).hex()
+            raise Exception("input num or text")
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):

@@ -60,8 +60,7 @@ class erc721slot():
         return self._contract.functions.totalSupply().call()
 
     def balance_of(self, account, **kwargs):
-        id = self.__convert_to_int(kwargs.get("id"))
-        return self._contract.functions.balanceOf(Web3.toChecksumAddress(account), id).call()
+        return self._contract.functions.balanceOf(Web3.toChecksumAddress(account)).call()
 
     def approve(self, spender, approved):
         return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), approved).call()
@@ -142,8 +141,9 @@ class erc721slot():
 
     def raw_mint_type(self, id, capacity, data):
         id = self.__convert_to_int(id)
+        capacity = self.__convert_to_int(capacity)
         data = b'' if not data else data
-        return self._contract.functions.appendType(Web3.toChecksumAddress(to), id, capacity, data)
+        return self._contract.functions.appendType(id, capacity, data)
 
     def raw_lock_type(self, id):
         id = self.__convert_to_int(id)
@@ -152,12 +152,6 @@ class erc721slot():
     def raw_unlock_type(self, id):
         id = self.__convert_to_int(id)
         return self._contract.functions.unlockType(id).call()
-
-    def sha3_id(self, data):
-        return Web3.sha3(hexstr= 
-                Web3.toHex(hexstr= (
-                     Web3.toHex(hexstr=data)[2:]).zfill(64))
-                ).hex()
 
 #*************************************internal********************************************#
     def __convert_to_int(self, value):

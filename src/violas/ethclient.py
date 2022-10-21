@@ -528,6 +528,15 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def append_type(self, account, token_id, id, capacity, data):
+        try:
+            datas = self.__client.append_type(account, token_id, id, capacity, data)
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def mint_quality(self, account, token_id, to, brand, btype, quality, nfttype = "", data = None, timeout = 180):
         try:
             datas = self.__client.mint_quality(account, token_id, to, brand, btype, quality, nfttype, data = data)
@@ -564,9 +573,9 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
-    def sha3_id(self, token_id, data):
+    def sha3_id(self, num = None, text=None):
         try:
-            datas = self.__client.sha3_id(token_id, data)
+            datas = self.__client.sha3_id(num, text)
             ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
             self._logger.debug(f"result: {ret.datas}")
         except Exception as e:

@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import time
 import operator
 import sys, getopt
 import json
@@ -116,12 +117,16 @@ def init_args(pargs):
     pargs.append(rawtransaction, "get transaction from eth nodes.")
     pargs.append(syncing_state, "get chain syncing state.",)
     pargs.append(mint, "mint id of token_id.")
+    pargs.append(mint_721, "mint token of erc721.")
     pargs.append(token_fields, "show id field info of token_id.")
     pargs.append(token_ids_count, "show count of token.")
     pargs.append(token_ids, "show part of tokens.")
     pargs.append(type_count, "show count of type.")
     pargs.append(type_list, "show type list.")
+    pargs.append(append_type, "new type.")
     pargs.append(token_list, "show all token.")
+    pargs.append(sha3_id, "make id(sha3).")
+    pargs.append(sha3_id_rand, "make rand id(sha3).")
     
     #pargs.appends(globals(), 
     #        no_includes = [run, 
@@ -232,15 +237,15 @@ def mint(manager, to_address, id, amount, data = None):
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
 
-def mint_721(manager, to_address, id):
+def mint_721(manager, to_address, id, tid):
     ret = wallet.get_account(manager)
     if ret.state != error.SUCCEED:
         raise Exception("get account failed")
     account = ret.datas
 
-    ret = client.mint(account, token_id, to_address, id, amount, data, tid = tid)
+    ret = client.mint(account, token_id, to_address, id, 1, None, tid = tid)
     assert ret.state == error.SUCCEED, ret.message
-    print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
+    print(f"cur balance :{client.get_balances(account.address).datas}")
 
 def exchange_blind_box(manager, to_address, id, data = None):
     ret = wallet.get_account(manager)
@@ -418,6 +423,18 @@ def mint_type(manager, to, brand, btype, data = None):
     __assert_result(ret)
     logger.debug(ret.datas)
 
+def append_type(manager, capacity, data):
+    ret = wallet.get_account(manager)
+    if ret.state != error.SUCCEED:
+        raise Exception("get account failed")
+    account = ret.datas
+
+    id = client.sha3_id(num = data).datas
+    ret = client.append_type(account, token_id, id, capacity, data)
+    __assert_result(ret)
+    logger.debug(ret.datas)
+
+
 
 def mint_quality(manager, to, brand, btype, quality, nfttype = "normal", data = None):
     ret = wallet.get_account(manager)
@@ -439,8 +456,18 @@ def mint_sub_token(manager, to, quality_id, amount, data = None, timeout = 180):
     __assert_result(ret)
     logger.debug(ret.datas)
 
+def sha3_id(data):
+    sid = client.sha3_id(text = data).datas
+    logger.debug("sid: {}".format(sid))
+
+def sha3_id_rand():
+    data = "{}".format(int(time.time()))
+    logger.debug("metadata: {}".format(data))
+    sid = client.sha3_id(num = data).datas
+    logger.debug("sid: {}".format(sid))
+
 def test():
-    sid = client.sha3_id(token_id, "0x03").datas
+    sid = client.sha3_id("0x03").datas
     logger.debug("sid: {}".format(sid))
 
 
