@@ -2,6 +2,7 @@ from .ethclient import (
         ethclient, 
         ethwallet,
         ERC1155_NAME,
+        ERC721_NAME,
         )
 from .comm import (
         result as ethresult,
@@ -15,9 +16,4 @@ from .log import (
 from .comm.functions import (
         json_print,
         root_path
-        )
-from .ethclient import (
-        ethclient, 
-        ethwallet,
-        ERC1155_NAME,
         )
