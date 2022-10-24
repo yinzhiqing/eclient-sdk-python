@@ -352,6 +352,9 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def get_type_count(self, token_id):
+        return self.type_count(token_id)
+
     def type_count(self, token_id):
         try:
             ret = result(error.SUCCEED, datas = self.__client.type_count(token_id))
