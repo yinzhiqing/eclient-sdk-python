@@ -467,6 +467,13 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def get_token_type(self, token_id, id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.token_type(token_id, id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def get_chain_id(self):
         try:
             ret = result(error.SUCCEED, datas = self.__client.get_chain_id())

@@ -121,8 +121,10 @@ def init_args(pargs):
     pargs.append(token_fields, "show id field info of token_id.")
     pargs.append(token_ids_count, "show count of token.")
     pargs.append(token_ids, "show part of tokens.")
-    pargs.append(type_count, "show count of type.")
+    pargs.append(token_type, "show type of token.")
     pargs.append(type_list, "show type list.")
+    pargs.append(type_count, "show count of type.")
+    pargs.append(type_datas, "show datas of type.")
     pargs.append(append_type, "new type.")
     pargs.append(token_list, "show all token.")
     pargs.append(sha3_id, "make id(sha3).")
@@ -327,6 +329,17 @@ def token_ids(start = 0, limit = 10):
     ret = client.get_token_ids(token_id, start = start, limit = limit)
     logger.debug("totle ids: ".format(ret.datas))
     json_print(ret.datas)
+
+def token_type(id):
+    logger.debug("start token_type({})".format(id))
+    ret = client.get_token_type(token_id, id)
+    logger.debug("token type: {0}".format(ret.datas))
+
+def type_datas(tid):
+    logger.debug("start token_type({})".format(tid))
+    ret = client.type_datas(token_id, tid)
+    logger.debug("type datas: {0}".format(ret.datas))
+
 
 def token_fields(id):
     logger.debug("start token_fields({})".format(token_id))
