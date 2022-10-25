@@ -324,9 +324,24 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+
     def token_id(self, token, index):
         try:
             ret = result(error.SUCCEED, datas = self.__client.token_id(token, index))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def minter_role(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.minter_role(token_id))
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    def admin_role(self, token_id):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.admin_role(token_id))
         except Exception as e:
             ret = parse_except(e)
         return ret
@@ -471,6 +486,15 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def grant_role(self, account, token_id, role, to):
+        try:
+            datas = self.__client.grant_role(account, token_id, role, to )
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+            self._logger.debug(f"result: {ret.datas}")
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def mint(self, account, token_id, to, id, amount, data = None, *args, **kwargs):
         try:
             datas = self.__client.mint(account, token_id, to, id, amount, data, *args, **kwargs)
@@ -518,6 +542,7 @@ class ethclient(baseobject):
         except Exception as e:
             ret = parse_except(e)
         return ret
+
 
     def mint_type(self, account, token_id, to, brand, btype, data = None):
         try:

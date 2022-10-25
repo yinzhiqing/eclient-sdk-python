@@ -76,7 +76,7 @@ class erc721slot():
 
     def raw_transfer_from(self, fom, to, id, amount, data = None):
         id = self.__convert_to_int(id)
-        data = b'' if not data else data
+        data = self.__convert_to_bytes(data)
         return self._contract.functions.safeTransferFrom(fom, to, id, amount, data)
 
     def raw_approve(self, spender, value):
@@ -93,7 +93,21 @@ class erc721slot():
         id = self.__convert_to_int(id)
         return self._contract.functions.burn(account, id, amount)
 
+    def raw_grant_role(self, role, address):
+        role = self.__convert_to_bytes(role)
+        return self._contract.functions.grantRole(role, address)
+
 #*************************************extende********************************************
+
+    def minter_role(self):
+        return self.__convert_to_hex(self._contract.functions.MINTER_ROLE().call())
+
+    def pauser_role(self):
+        return self.__convert_to_hex(self._contract.functions.PAUSER_ROLE().call())
+
+    def admin_role(self):
+        return self.__convert_to_hex(self._contract.functions.DEFAULT_ADMIN_ROLE().call())
+
     def index_start(self, token_id, **kwargs):
         return 0
 
@@ -142,7 +156,8 @@ class erc721slot():
     def raw_mint_type(self, id, capacity, data):
         id = self.__convert_to_int(id)
         capacity = self.__convert_to_int(capacity)
-        data = b'' if not data else data
+        data = self.__convert_to_bytes(data)
+
         return self._contract.functions.appendType(id, capacity, data)
 
     def raw_lock_type(self, id):
@@ -163,6 +178,11 @@ class erc721slot():
         if value and not isinstance(value, str):
             value = Web3.toHex(value)
         return value[2:] if value.lower().startswith("0x") else value
+
+    def __convert_to_bytes(self, value):
+        if value and not isinstance(value, str):
+            value = Web3.toBytes(value)
+        return b'' if not value else value
 
     def __convert_ids(self, ids):
         uids = []

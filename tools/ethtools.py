@@ -127,6 +127,8 @@ def init_args(pargs):
     pargs.append(token_list, "show all token.")
     pargs.append(sha3_id, "make id(sha3).")
     pargs.append(sha3_id_rand, "make rand id(sha3).")
+    pargs.append(role_list, "show role list")
+    pargs.append(grant_role, "grant role")
     
     #pargs.appends(globals(), 
     #        no_includes = [run, 
@@ -180,7 +182,8 @@ def has_account(address):
 
 client = None
 eth_nodes   = [dict(
-    host  = "http://124.251.110.238/rpc",
+    #host  = "http://124.251.110.238/rpc",
+    host  = "http://172.21.0.4/rpc",
     name  = "violins",
     )]
 eth_wallet  = "ewallet"
@@ -434,8 +437,6 @@ def append_type(manager, capacity, data):
     __assert_result(ret)
     logger.debug(ret.datas)
 
-
-
 def mint_quality(manager, to, brand, btype, quality, nfttype = "normal", data = None):
     ret = wallet.get_account(manager)
     if ret.state != error.SUCCEED:
@@ -456,6 +457,15 @@ def mint_sub_token(manager, to, quality_id, amount, data = None, timeout = 180):
     __assert_result(ret)
     logger.debug(ret.datas)
 
+def grant_role(manager, role, address):
+    ret = wallet.get_account(manager)
+    if ret.state != error.SUCCEED:
+        raise Exception("get account failed")
+    account = ret.datas
+
+    ret = client.grant_role(account, token_id, role, address)
+    logger.debug(ret.datas)
+
 def sha3_id(data):
     sid = client.sha3_id(text = data).datas
     logger.debug("sid: {}".format(sid))
@@ -465,6 +475,14 @@ def sha3_id_rand():
     logger.debug("metadata: {}".format(data))
     sid = client.sha3_id(num = data).datas
     logger.debug("sid: {}".format(sid))
+
+def role_list():
+    role_names = {
+            "minter": client.minter_role(token_id).datas,
+            "admin": client.admin_role(token_id).datas
+            }
+    logger.debug(role_names)
+    
 
 def test():
     sid = client.sha3_id("0x03").datas

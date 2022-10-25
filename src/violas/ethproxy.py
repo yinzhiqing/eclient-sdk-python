@@ -366,6 +366,15 @@ class ethproxy():
 
         return ids
 
+    def minter_role(self, token_id):
+        return self._slot_cli(token_id).minter_role()
+
+    def pauser_role(self, token_id):
+        return self._slot_cli(token_id).pauser_role()
+
+    def admin_role(self, token_id):
+        return self._slot_cli(token_id).admin_role()
+
     def type_name(self, token_id, id):
         return self._slot_cli(token_id).type_name(id)
 
@@ -398,6 +407,14 @@ class ethproxy():
 
     def is_exchange(self, token_id, nfttype : int):
         return self._slot_cli(token_id).is_exchange(nfttype)
+
+    def grant_role(self, account, token_id, role, address, timeout = 180):
+        calldata = self._slot_cli(token_id).raw_grant_role(role, address)
+        return self.send_contract_transaction(account.address, 
+                account.key, 
+                calldata, 
+                nonce = None, 
+                timeout = timeout) 
 
     def mint_brand(self, account, token_id, to_address, brand, data = None, timeout = 180):
         calldata = self._slot_cli(token_id).raw_mint_brand(to_address, brand, data)
