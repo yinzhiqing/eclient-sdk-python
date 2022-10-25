@@ -331,7 +331,7 @@ class ethproxy():
     def token_id(self, token, index): 
         return self._slot_cli(token).token_id(index)
 
-    def token_type(self, token_id):
+    def token_type(self, token_id, id):
         return self._slot_cli(token_id).token_type(id)
 
     def brand_count(self, token_id):
@@ -342,6 +342,9 @@ class ethproxy():
         
     def brand_id(self, token_id, name):
         return self._slot_cli(token_id).brand_id(name)
+
+    def get_type_count(self, token_id):
+        return self.type_count(token_id)
 
     def type_count(self, token_id):
         return self._slot_cli(token_id).type_count()
