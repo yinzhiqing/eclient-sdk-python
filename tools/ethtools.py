@@ -152,7 +152,6 @@ def new_account():
 def accounts():
     i = 0
     account_count = wallet.get_account_count()
-    print(f"account count: {account_count}")
     while True and i < account_count:
         ret = wallet.get_account(int(i))
         if ret.state != error.SUCCEED:
@@ -205,7 +204,8 @@ def get_ethwallet():
     global ewclient
     if ewclient:
         return eclient
-    ewclient = ethwallet(name, eth_wallet, chain)
+    ewclient = ethwallet(name, eth_wallet, chain, cache = False)
+    print("load wallent ok")
     return ewclient
 
 def get_ethproof(dtype = "v2b"):

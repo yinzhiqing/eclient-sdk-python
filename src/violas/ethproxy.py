@@ -56,13 +56,13 @@ contract_codes = {
 
 class walletproxy(lbethwallet):
     @classmethod
-    def load(self, filename):
-        ret = self.recover(filename)
+    def load(self, filename, cache = True):
+        ret = self.recover(filename, cache = cache)
         return ret
 
     @classmethod
-    def loads(self, data):
-        ret = self.recover_from_mnemonic(data)
+    def loads(self, data, cache = True):
+        ret = self.recover_from_mnemonic(data, cache = cache)
         return ret
 
     @classmethod

@@ -13,8 +13,8 @@ from web3 import Web3
 class lbethwallet:
     
     DELIMITER = ";"
-    def __init__(self, mnemonic, passphrase = ""):
-        self.init_account(mnemonic, passphrase)
+    def __init__(self, mnemonic, passphrase = "", cache = True):
+        self.__init_account(mnemonic, passphrase, cache = cache)
 
     def split_mnemonic(self, mnemonic):
         m_i = mnemonic.split(self.DELIMITER)
@@ -25,17 +25,21 @@ class lbethwallet:
     def get_account_path(self, index):
         return f"m/44'/60'/0'/0/{index}"
 
-    def init_account(self, mnemonic, passphrase):
+    def __init_account(self, mnemonic, passphrase, cache = True):
+        self.__cache = cache
         self._passphrase = passphrase
         self.accounts = []
         self._addr_map = {}
         setattr(self, "child_count", int(0))
         (self._mnemonic, num) = self.split_mnemonic(mnemonic.strip())
         web3.Account.enable_unaudited_hdwallet_features()
-        for i in range(num):
-            self.new_account()
-
-        return len(self.accounts)
+        if cache:
+            for i in range(num):
+                self.new_account()
+        else:
+            self.child_count = num
+    
+        return num
 
     def new_account(self):
         account = web3.Account.from_mnemonic(self._mnemonic, self._passphrase, self.get_account_path(self.child_count))
@@ -48,15 +52,15 @@ class lbethwallet:
         return self.child_count
 
     @classmethod
-    def recover(cls, filename):
+    def recover(cls, filename, cache = True):
         if os.path.exists(filename):
             with open(filename) as f:
                 data = f.read()
-                return cls(data)
+                return cls(data, cache = cache)
 
     @classmethod
-    def recover_from_mnemonic(cls, data):
-        return cls(data)
+    def recover_from_mnemonic(cls, data, cache = True):
+        return cls(data, cache = cache)
 
     @classmethod
     def new(cls):
@@ -72,13 +76,22 @@ class lbethwallet:
 
     def get_account_by_address_or_refid(self, address_or_refid):
         id = address_or_refid
-        if isinstance(address_or_refid, bytes):
-            address_or_refid = address_or_refid.hex()
-        if isinstance(address_or_refid, str):
-            id = self._addr_map.get(address_or_refid)
-        if not isinstance(id, int):
-            raise Exception(f"address_or_refid({id}) type is invalid.")
-        return self.accounts[id]
+        if self.__cache:
+            if isinstance(address_or_refid, bytes):
+                address_or_refid = address_or_refid.hex()
+            if isinstance(address_or_refid, str):
+                id = self._addr_map.get(address_or_refid)
+            if not isinstance(id, int):
+                raise Exception(f"address_or_refid({id}) type is invalid.")
+            return self.accounts[id]
+        else:
+            return self.get_account_with_index(int(id))
+
+
+
+    def get_account_with_index(self, index):
+        return web3.Account.from_mnemonic(self._mnemonic, self._passphrase, self.get_account_path(index))
+
 
 
 def main():

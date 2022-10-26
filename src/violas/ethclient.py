@@ -33,29 +33,29 @@ name="eclient"
 
 class ethwallet(baseobject):
     
-    def __init__(self, name, wallet, chain="ethereum", main_address = None):
+    def __init__(self, name, wallet, chain="ethereum", main_address = None, cache = True):
         assert wallet is not None, "wallet is None"
         baseobject.__init__(self, name)
         self.__wallet = None
 
         if wallet is not None:
-            ret = self.__load_wallet(wallet, chain)
+            ret = self.__load_wallet(wallet, chain, cache = cache)
             if ret.state != error.SUCCEED:
                 raise Exception(f"load wallet[{wallet}] failed.")
 
     def __del__(self):
         pass
 
-    def __load_wallet(self, wallet, chain="ethereum"):
+    def __load_wallet(self, wallet, chain="ethereum", cache = True):
         try:
             self.__wallet_name = wallet
 
             if os.path.isfile(wallet):
-                self.__wallet = walletproxy.load(wallet)
+                self.__wallet = walletproxy.load(wallet, cache)
                 ret = result(error.SUCCEED, "", "")
             elif is_mnemonic(wallet):
                 self.__wallet_name = None
-                self.__wallet = walletproxy.loads(wallet)
+                self.__wallet = walletproxy.loads(wallet, cache)
                 ret = result(error.SUCCEED, "", "")
             else:
                 ret = result(error.SUCCEED, "not found wallet file", "")
@@ -105,7 +105,7 @@ class ethwallet(baseobject):
         return ret
 
     def get_account_count(self):
-        return len(self.__wallet.accounts)
+        return self.__wallet.child_count
 
     def get_account(self, addressorid):
         try:
