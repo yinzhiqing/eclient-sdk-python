@@ -107,6 +107,10 @@ class ethwallet(baseobject):
     def get_account_count(self):
         return self.__wallet.child_count
 
+    def get_account_address(self,addressid):
+        address = self.get_account(addressid).datas.address
+        return result(error.SUCCEED, datas = address)
+
     def get_account(self, addressorid):
         try:
             account = self.__wallet.get_account_by_address_or_refid(addressorid)
