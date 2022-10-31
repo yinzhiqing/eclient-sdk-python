@@ -296,12 +296,15 @@ class ethclient(baseobject):
     def send_coin_erc1155(self, account, toaddress, amount, token_id, id, *args, **kwargs):
         return self.send_coin(account, toaddress, amount, token_id, data= {"type":"erc1155", "version": None}, id = id, *args, **kwargs)
 
+    def send_coin_erc721(self, account, toaddress, token_id, id, *args, **kwargs):
+        return self.send_coin(account, toaddress, 1, token_id, data= {"type":"erc721", "version": None}, id = id, *args, **kwargs)
+
     def send_coin(self, account, toaddress, amount, token_id, data, id = None, *args, **kwargs):
         '''change state 
         '''
         try:
             sender_account = self.map_account(account)
-            if data["type"] in ("erc20", "erc1155"):
+            if data["type"] in ("erc20", "erc1155", "erc721"):
                 datas = self.__client.send_token(sender_account, toaddress, amount, token_id, id = id)
             else:
                 raise Exception(f"type{type} is invald.")

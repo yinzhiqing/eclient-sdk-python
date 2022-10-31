@@ -110,6 +110,7 @@ def init_args(pargs):
     #client
     pargs.append(send_coin_erc20, "send token(erc20 coin) to target address")
     pargs.append(send_coin_erc1155, "send token(erc1155 coin) to target address")
+    pargs.append(send_coin_erc721, "send token(erc721 coin) to target address")
     pargs.append(approve, "approve to_address use coin amount from from_address")
     pargs.append(allowance, "request to_address can use coin amount from from_address")
     pargs.append(balance, "get address's token(module) amount.")
@@ -183,8 +184,8 @@ def has_account(address):
 
 client = None
 eth_nodes   = [dict(
-    #host  = "http://124.251.110.238/rpc",
-    host  = "http://172.21.0.4/rpc",
+    host  = "http://124.251.110.238/rpc",
+    #host  = "http://172.21.0.4/rpc",
     name  = "violins",
     )]
 eth_wallet  = "ewallet"
@@ -204,7 +205,7 @@ def get_ethwallet():
     global ewclient
     if ewclient:
         return eclient
-    ewclient = ethwallet(name, eth_wallet, chain, cache = False)
+    ewclient = ethwallet(name, eth_wallet, chain, cache = True)
     print("load wallent ok")
     return ewclient
 
@@ -222,13 +223,23 @@ def send_coin_erc20(from_address, to_address, amount, token_id):
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id).datas}")
 
-def send_coin_erc1155(from_address, to_address, amount, token_id, id):
+def send_coin_erc1155(from_address, to_address, amount, id):
     ret = wallet.get_account(from_address)
     if ret.state != error.SUCCEED:
         raise Exception("get account failed")
     account = ret.datas
 
     ret = client.send_coin_erc1155(account, to_address, amount, token_id, id)
+    assert ret.state == error.SUCCEED, ret.message
+    print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
+
+def send_coin_erc721(from_address, to_address, id):
+    ret = wallet.get_account(from_address)
+    if ret.state != error.SUCCEED:
+        raise Exception("get account failed")
+    account = ret.datas
+
+    ret = client.send_coin_erc721(account, to_address, token_id, id)
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
 
@@ -262,7 +273,7 @@ def exchange_blind_box(manager, to_address, id, data = None):
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
 
-def approve(from_address, to_address, amount, token_id):
+def approve(from_address, to_address, amount):
     ret = wallet.get_account(from_address)
     if ret.state != error.SUCCEED:
         raise Exception("get account failed")
@@ -272,17 +283,17 @@ def approve(from_address, to_address, amount, token_id):
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.allowance(from_address, to_address, token_id).datas}")
 
-def allowance(from_address, to_address, token_id):
+def allowance(from_address, to_address):
     ret = client.allowance(from_address, to_address, token_id)
     assert ret.state == error.SUCCEED, ret.message
     print(f"allowance balance :{ret.datas}")
 
-def balance(address, token_id, id = None):
+def balance(address, id = None):
     logger.debug(f"start balance address= {address} token_id= {token_id}, id = {id}")
     ret = client.get_balance(address, token_id, id = id)
     logger.debug("balance: {0}".format(ret.datas))
 
-def decimals(token_id):
+def decimals():
     logger.debug(f"start decimals token_id= {token_id}")
     ret = client.get_decimals(token_id)
     logger.debug(f"decimals: {ret}")

@@ -74,10 +74,10 @@ class erc721slot():
     def unpause(self):
         return self._contract.functions.unpause().call()
 
-    def raw_transfer_from(self, fom, to, id, amount, data = None):
+    def raw_transfer_from(self, fom, to, id, amount = 1, data = None):
         id = self.__convert_to_int(id)
         data = self.__convert_to_bytes(data)
-        return self._contract.functions.safeTransferFrom(fom, to, id, amount, data)
+        return self._contract.functions.safeTransferFrom(fom, to, id, data)
 
     def raw_approve(self, spender, value):
         return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), value)
