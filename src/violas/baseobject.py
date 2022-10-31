@@ -23,13 +23,12 @@ getlogger = log.logger.getLogger
 exe_lock = Lock()
 class baseobject(object):
     def __init__(self, name = 'base', work = True, chain = None):
-        self._name = None
         self._logger = None
         self._from_chain = None
         self._map_chain = None
         self.__chain = chain
         self._work = work
-        self._name = name
+        self.__name = name
         self.append_property("usd_exe_lock", False)
         self.append_property("work_context", {})
 
@@ -74,7 +73,7 @@ class baseobject(object):
             pass
 
     def name(self):
-        return self._name
+        return self.__name
 
     def init_defalut_property(self):
         ppts = {"from_chain": None, "map_chain":None, }

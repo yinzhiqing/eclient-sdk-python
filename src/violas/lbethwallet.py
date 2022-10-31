@@ -16,6 +16,10 @@ class lbethwallet:
     def __init__(self, mnemonic, passphrase = "", cache = True):
         self.__init_account(mnemonic, passphrase, cache = cache)
 
+    @property
+    def cached(self) :
+        return self.__cache
+
     def split_mnemonic(self, mnemonic):
         m_i = mnemonic.split(self.DELIMITER)
         if len(m_i) == 1:

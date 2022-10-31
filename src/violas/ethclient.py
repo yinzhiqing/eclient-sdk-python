@@ -43,9 +43,14 @@ class ethwallet(baseobject):
             if ret.state != error.SUCCEED:
                 raise Exception(f"load wallet[{wallet}] failed.")
 
+    @property
+    def cached(self) :
+        return self.__wallet.cached
+
     def __del__(self):
         pass
 
+   
     def __load_wallet(self, wallet, chain="ethereum", cache = True):
         try:
             self.__wallet_name = wallet
