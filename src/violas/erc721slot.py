@@ -21,10 +21,8 @@ class idfields():
         id = self.__convert_to_hex(id)
         setattr(self, "id", id)
 
-
     def __parent_token(self):
         return ""
-
 
     def __convert_to_int(self, value):
         if value and isinstance(value, str):
@@ -62,12 +60,16 @@ class erc721slot():
     def balance_of(self, account, **kwargs):
         return self._contract.functions.balanceOf(Web3.toChecksumAddress(account)).call()
 
-    def approve(self, spender, approved):
-        return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), approved).call()
-
-    def allowance(self, owner, spender):
-        return self._contract.functions.isApprovalForAll(Web3.toChecksumAddress(owner), Web3.toChecksumAddress(spender)).call()
+    def approved(self, id):
+        id = self.__convert_to_int(id)
+        return self._contract.functions.getApproved(id).call()
     
+    def allowance(self, owner, spender):
+        raise Exception("not support")
+    
+    def token_manager(self):
+        return self._contract.functions.tokenManager().call()
+
     def pause(self):
         return self._contract.functions.pause().call()
 
@@ -80,7 +82,8 @@ class erc721slot():
         return self._contract.functions.safeTransferFrom(fom, to, id, data)
 
     def raw_approve(self, spender, value):
-        return self._contract.functions.setApprovalForAll(Web3.toChecksumAddress(spender), value)
+        id = self.__convert_to_int(value)
+        return self._contract.functions.approve(Web3.toChecksumAddress(spender), id)
 
     def raw_mint(self, to, id, amount, data = None, *args, **kwargs):
         tid     = kwargs.get("tid", 0)

@@ -278,9 +278,18 @@ class ethclient(baseobject):
         return self.__client.get_decimals(token_id)
 
     @output_args
-    def approve(self, account, to_address, amount, token_id, **kwargs):
+    def approve(self, account, to_address, value, token_id, **kwargs):
         try:
-            datas = self.__client.approve(account, to_address, amount, token_id, **kwargs)
+            datas = self.__client.approve(account, to_address, value, token_id, **kwargs)
+            ret = result(error.SUCCEED, datas = datas)
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    @output_args
+    def approved(self, id, token_id, **kwargs):
+        try:
+            datas = self.__client.approved(id, token_id, **kwargs)
             ret = result(error.SUCCEED, datas = datas)
         except Exception as e:
             ret = parse_except(e)
@@ -290,6 +299,15 @@ class ethclient(baseobject):
     def allowance(self, from_address, to_address, token_id, **kwargs):
         try:
             datas = self.__client.allowance(from_address, to_address, token_id, **kwargs)
+            ret = result(error.SUCCEED, datas = datas)
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
+    @output_args
+    def token_manager(self, token_id, **kwargs):
+        try:
+            datas = self.__client.token_manager(token_id, **kwargs)
             ret = result(error.SUCCEED, datas = datas)
         except Exception as e:
             ret = parse_except(e)

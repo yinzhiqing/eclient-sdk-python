@@ -113,6 +113,8 @@ def init_args(pargs):
     pargs.append(send_coin_erc721, "send token(erc721 coin) to target address")
     pargs.append(send_coin_eth, "send eth to target address")
     pargs.append(approve, "approve to_address use coin amount from from_address")
+    pargs.append(approved, "approved address of id")
+    pargs.append(token_manager, "manager of tokens")
     pargs.append(allowance, "request to_address can use coin amount from from_address")
     pargs.append(balance, "get address's token(module) amount.")
     pargs.append(balances, "get address's tokens.")
@@ -284,15 +286,25 @@ def exchange_blind_box(manager, to_address, id, data = None):
     assert ret.state == error.SUCCEED, ret.message
     print(f"cur balance :{client.get_balance(account.address, token_id, id = id).datas}")
 
-def approve(from_address, to_address, amount):
+def approve(from_address, to_address, value):
     ret = wallet.get_account(from_address)
     if ret.state != error.SUCCEED:
         raise Exception("get account failed")
     account = ret.datas
 
-    ret = client.approve(account, to_address, amount, token_id)
+    ret = client.approve(account, to_address, value, token_id)
     assert ret.state == error.SUCCEED, ret.message
-    print(f"cur balance :{client.allowance(from_address, to_address, token_id).datas}")
+    print(f"approved :{client.approved(id, token_id).datas}")
+
+def approved(id):
+    ret = client.approved(id, token_id)
+    assert ret.state == error.SUCCEED, ret.message
+    print(f"approved :{client.approved(id, token_id).datas}")
+
+def token_manager():
+    ret = client.token_manager(token_id)
+    assert ret.state == error.SUCCEED, ret.message
+    print(f"token manager:{ret.datas}")
 
 def allowance(from_address, to_address):
     ret = client.allowance(from_address, to_address, token_id)

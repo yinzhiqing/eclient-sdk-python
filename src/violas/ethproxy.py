@@ -156,8 +156,14 @@ class ethproxy():
     def allowance(self, owner, spender, token_id, **kwargs):
         return self._slot_cli(token_id).allowance(owner, spender)
 
-    def approve(self, account, spender, amount, token_id, timeout = 180, **kwargs):
-        calldata = self._slot_cli(token_id).raw_approve(spender, amount)
+    def approved(self, id, token_id, **kwargs):
+        return self._slot_cli(token_id).approved(id)
+
+    def token_manager(self, token_id, **kwargs):
+        return self._slot_cli(token_id).token_manager()
+
+    def approve(self, account, spender, value, token_id, timeout = 180, **kwargs):
+        calldata = self._slot_cli(token_id).raw_approve(spender, value)
         return self.send_contract_transaction(account.address, account.key, calldata, timeout = timeout) 
 
     def send_token(self, account, to_address, amount, token_id, nonce = None, timeout = 180, id = None):
