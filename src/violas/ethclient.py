@@ -241,7 +241,7 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
-    def get_balance(self, account_address, token_id, id = None):
+    def get_balance(self, account_address, token_id = "eth", id = None):
         try:
             balance = self.__client.get_balance(account_address, token_id, id = id)
             ret = result(error.SUCCEED, "", balance)
@@ -304,6 +304,14 @@ class ethclient(baseobject):
     def send_coin_erc721(self, account, toaddress, token_id, id, *args, **kwargs):
         return self.send_coin(account, toaddress, 1, token_id, data= {"type":"erc721", "version": None}, id = id, *args, **kwargs)
 
+    def send_coin_eth(self, account, toaddress, amount, *args, **kwargs):
+        try:
+            datas = self.__client.send_token(account, toaddress, amount, "eth")
+            ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def send_coin(self, account, toaddress, amount, token_id, data, id = None, *args, **kwargs):
         '''change state 
         '''
@@ -314,7 +322,6 @@ class ethclient(baseobject):
             else:
                 raise Exception(f"type{type} is invald.")
             ret = result(error.SUCCEED if len(datas) > 0 else error.FAILED, "", datas = datas)
-            self._logger.debug(f"result: {ret.datas}")
         except Exception as e:
             ret = parse_except(e)
         return ret

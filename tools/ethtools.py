@@ -111,6 +111,7 @@ def init_args(pargs):
     pargs.append(send_coin_erc20, "send token(erc20 coin) to target address")
     pargs.append(send_coin_erc1155, "send token(erc1155 coin) to target address")
     pargs.append(send_coin_erc721, "send token(erc721 coin) to target address")
+    pargs.append(send_coin_eth, "send eth to target address")
     pargs.append(approve, "approve to_address use coin amount from from_address")
     pargs.append(allowance, "request to_address can use coin amount from from_address")
     pargs.append(balance, "get address's token(module) amount.")
@@ -213,6 +214,16 @@ def get_ethproof(dtype = "v2b"):
 
     return requestclient(name, "")
 
+def send_coin_eth(from_address, to_address, amount):
+    ret = wallet.get_account(from_address)
+    if ret.state != error.SUCCEED:
+        raise Exception("get account failed")
+    account = ret.datas
+
+    ret = client.send_coin_eth(account, to_address, amount)
+    assert ret.state == error.SUCCEED, ret.message
+    print(f"cur balance :{client.get_balance(to_address, 'eth').datas}")
+
 def send_coin_erc20(from_address, to_address, amount, token_id):
     ret = wallet.get_account(from_address)
     if ret.state != error.SUCCEED:
@@ -289,8 +300,11 @@ def allowance(from_address, to_address):
     print(f"allowance balance :{ret.datas}")
 
 def balance(address, id = None):
-    logger.debug(f"start balance address= {address} token_id= {token_id}, id = {id}")
-    ret = client.get_balance(address, token_id, id = id)
+    logger.debug(f"start get balance address= {address} token_id= {token_id if id else 'eth'}, id = {id if id else ''}")
+    if id:
+        ret = client.get_balance(address, token_id, id = id)
+    else:
+        ret = client.get_balance(address)
     logger.debug("balance: {0}".format(ret.datas))
 
 def decimals():
