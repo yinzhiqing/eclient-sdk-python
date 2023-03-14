@@ -90,15 +90,15 @@ class erc721slot():
         id      = self.__convert_to_int(id)
         tid      = self.__convert_to_int(tid)
 
-        return self._contract.functions.mint(to, id, tid)
+        return self._contract.functions.mint(Web3.toChecksumAddress(to), id, tid)
 
     def raw_burn(self, account, id, amount):
         id = self.__convert_to_int(id)
-        return self._contract.functions.burn(account, id, amount)
+        return self._contract.functions.burn(Web3.toChecksumAddress(account), id, amount)
 
     def raw_grant_role(self, role, address):
         role = self.__convert_to_bytes(role)
-        return self._contract.functions.grantRole(role, address)
+        return self._contract.functions.grantRole(role, Web3.toChecksumAddress(address))
 
 #*************************************extende********************************************
 
