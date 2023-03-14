@@ -654,6 +654,13 @@ class ethclient(baseobject):
             ret = parse_except(e)
         return ret
 
+    def get_block(self):
+        try:
+            ret = result(error.SUCCEED, datas = self.__client.block_number())
+        except Exception as e:
+            ret = parse_except(e)
+        return ret
+
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
             # Python internal stuff
